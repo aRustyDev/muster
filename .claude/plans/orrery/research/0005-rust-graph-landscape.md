@@ -13,18 +13,25 @@
 
 ## Result
 
-**Two survivors: Grafeo and agdb.** Outcome branch "2–4: proceed as planned;
-carry to Phase 1b." The screen found no candidate without a serious caveat —
-the two survivors carry youth (Grafeo, ~6 months old) and bus-factor-one
-(agdb) risk respectively — but both pass all five hard requirements with
-first-hand-verified per-hop filtering, and both are synchronous, pure-Rust,
-Apache-2.0, ACID, embedded stores.
+**Two survivors from the screen: Grafeo and agdb.** Outcome branch "2–4:
+proceed as planned; carry to Phase 1b." The screen found no candidate without
+a serious caveat — the two survivors carry youth (Grafeo, ~6 months old) and
+bus-factor-one (agdb) risk respectively — but both pass all five hard
+requirements with first-hand-verified per-hop filtering, and both are
+synchronous, pure-Rust, Apache-2.0, ACID, embedded stores.
+
+**Amendment (owner decision, 2026-08-01): Cozo reinstated — three candidates
+advance to Phase 1b.** Cozo's only failure was requirement 5 (dormancy); the
+owner reviewed that result and accepted the maintenance risk explicitly. The
+criterion stands for every other candidate; the override, and the
+self-maintenance consequences it accepts, are recorded on Cozo's scorecard.
+Survivor count remains inside the 2–4 proceed branch.
 
 | Candidate | Category | Stop-gate (req 1) | Fatal requirement(s) | Verdict |
 |---|---|---|---|---|
 | **Grafeo** | A | **pass** — GQL G050 per-hop WHERE, conformance-file verified | — (maintenance caution: 6 months old) | **advance to 1b** |
 | **agdb** | A | **pass** — per-element conditions during walk, ordered comparisons | — (caution: bus factor 1) | **advance to 1b** |
-| Cozo | A | pass (Datalog semantics) | **5** — dormant 20 months, no release 2.5 yrs | eliminated |
+| Cozo | A | pass (Datalog semantics) | **5** — dormant 20 months, no release 2.5 yrs | screen: eliminated → **reinstated by owner decision; advance to 1b** |
 | Oxigraph | B | **fail** — SPARQL paths cannot filter mid-path | 1 | eliminated |
 | OxiRS | B | fail — same SPARQL limitation | 1, 5 | eliminated |
 | GraphLite | A | unverified (parse-level only, equality-only) | 5 — stalled 6 months, crate at 0.0.1 | eliminated |
@@ -54,11 +61,14 @@ Apache-2.0, ACID, embedded stores.
    evidence, but no off-the-shelf project delivers it; if the shape is wanted,
    it is a build (a thin traversal layer inside our own SQLite repository
    implementation), not a buy.
-2. **Cozo is the mandate's saddest result.** Its "note on Cozo specifically"
-   hoped Datalog would dissolve the stop-gate, and it does — recursion with
-   per-step edge constraints is native, and it even has first-class time
-   travel. It fails anyway: no release since 2023-12, no commit since
-   2024-12, one maintainer. The best semantic fit on the list is unmaintained.
+2. **Cozo is the mandate's saddest result — softened by owner decision.** Its
+   "note on Cozo specifically" hoped Datalog would dissolve the stop-gate, and
+   it does — recursion with per-step edge constraints is native, and it even
+   has first-class time travel. The screen failed it anyway: no release since
+   2023-12, no commit since 2024-12, one maintainer. The owner subsequently
+   accepted that risk (see Result amendment), so the best semantic fit
+   advances — with the self-maintenance consequences recorded on its
+   scorecard.
 3. **The taxonomy did less work than predicted.** The mandate expected the
    category cut to eliminate "roughly half of twenty in about an hour"; it
    eliminated six (3×C, 2×D, 1 unlocatable). The heavy lifting was done by
@@ -77,7 +87,8 @@ Apache-2.0, ACID, embedded stores.
 ## The async question (Rule 04, ADR-0022) — resolved
 
 Every surviving candidate (and the SQLite baseline, and `MemoryRepo`) exposes a
-**synchronous** API. The repository trait is therefore **sync**. Recorded as
+**synchronous** API — Cozo's reinstatement changes nothing, as its Rust API is
+also blocking. The repository trait is therefore **sync**. Recorded as
 ADR-0023. Async candidates existed (Grust, LanceGraph, neo4rs) and all were
 eliminated on other grounds first — the trait shape did not have to be forced.
 
@@ -90,6 +101,12 @@ one-mutable-or-many-immutable transactions; Grafeo's G051 (non-local, i.e.
 cross-hop predicates) is explicitly *not supported*, matching Ladybug's
 limitation. Per-hop **constant** predicates are safely inside the intersection
 and Q1 may rely on them.
+
+Cozo's reinstatement does not relax the intersection — its mem backend is
+single-writer, and while Datalog recursion *could* carry prior-hop state
+through rule-head variables (a capability Grafeo and agdb lack), that is
+precisely the kind of most-permissive-store feature the repository trait must
+not absorb. The no-cross-hop constraint stands.
 
 ## What Stage A explicitly did not establish
 

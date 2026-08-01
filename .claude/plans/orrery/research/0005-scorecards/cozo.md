@@ -24,10 +24,31 @@ Not assessed further — eliminated on requirement 5.
 
 ## Verdict
 
-**eliminated**
+Screen verdict (2026-08-01): **eliminated** on requirement 5.
 
 **Reason (one sentence):** The best semantic fit for Q1 on the entire list — native recursion with per-step edge constraints plus built-in time travel — but the project has had no release in 2.5 years and no commit in 20 months, and adopting an unmaintained single-author store as system of record fails the pre-committed maintenance requirement.
 
+### Owner decision (2026-08-01) — **reinstated: advance to Phase 1b**
+
+The project owner reviewed the screen result and accepted the maintenance
+risk explicitly: the lack of activity is acceptable for Cozo. Requirement 5
+is overridden for this candidate only — the criterion itself stands and was
+not mis-specified (Rule 01.2); this is the owner exercising the input that
+ADR-0015 names as legitimate.
+
+Consequences accepted with the override (recorded per Rule 02):
+
+* **We become the de-facto maintainer of anything we hit.** Bug fixes,
+  security patches, and dependency rot in a ~90k-line Datalog engine land on
+  this project. MPL-2.0 permits a private or public fork; a vendoring/fork
+  plan should exist before Cozo could win Phase 7.
+* Bus factor of the upstream is 1 and the upstream may never review a PR.
+* If Cozo *wins* ADR-0015 at Phase 7, that ADR must restate this risk
+  acceptance in its own consequences — it cannot ride in silently on this
+  scorecard.
+
 ## Uncertainty
 
-Whether maintenance resumes (no archive notice exists); formal durability semantics per backend; recursion-with-filter performance (vendor QPS claims only). If Cozo revives, it deserves an immediate re-screen — record, do not forget.
+Formal durability semantics per backend; recursion-with-filter performance
+(vendor QPS claims only); Rust-binding behaviour under sustained load. All
+now Phase 1b questions, since the candidate advances.

@@ -49,11 +49,23 @@ evaluation, `Beyond`/`NotBeyond` traversal gating, ordered comparisons).
 
 ## Results
 
-**Survivors: Grafeo and agdb** — both category-A, pure-Rust, Apache-2.0,
-embedded, ACID, synchronous, with first-hand-verified per-hop edge-property
-filtering. Neither is risk-free: Grafeo is ~6 months old with a ~2.5-month
-quiet spell on `main`; agdb has years of steady cadence (release 4 days before
-the screen) but effectively one maintainer.
+**Survivors from the screen: Grafeo and agdb** — both category-A, pure-Rust,
+Apache-2.0, embedded, ACID, synchronous, with first-hand-verified per-hop
+edge-property filtering. Neither is risk-free: Grafeo is ~6 months old with a
+~2.5-month quiet spell on `main`; agdb has years of steady cadence (release 4
+days before the screen) but effectively one maintainer.
+
+### Amendment — owner decision, 2026-08-01
+
+After reviewing the screen result, the project owner accepted Cozo's
+maintenance risk ("the lack of activity is acceptable for Cozo").
+**Cozo is reinstated; three candidates advance to Phase 1b** — still inside
+the pre-committed 2–4 proceed branch, so no other outcome-table row changes.
+The requirement-5 criterion itself stands and was not mis-specified; this is
+the owner input that ADR-0015 explicitly names as legitimate, exercised
+against a named risk. The accepted consequences (de-facto self-maintenance,
+fork-readiness before Cozo could win Phase 7) are recorded on the Cozo
+scorecard, and ADR-0015's closing ADR must restate them if Cozo wins.
 
 Full elimination table, refutations, and the MemoryRepo constraint
 intersection: `.claude/plans/orrery/research/0005-rust-graph-landscape.md`.
@@ -84,9 +96,10 @@ Headlines:
 
 | Item | Resolves in |
 |---|---|
-| Phase 1b Rust screening harness over Grafeo + agdb (bulk load, Q1/Q2/Q7b shapes, result materialisation — carry Phase 0's harness corrections) | Phase 1b (parallel with 3–5) |
+| Phase 1b Rust screening harness over Grafeo + agdb + Cozo (bulk load, Q1/Q2/Q7b shapes, result materialisation — carry Phase 0's harness corrections) | Phase 1b (parallel with 3–5) |
+| Cozo fork/vendoring readiness plan (owner accepted dormancy risk; we self-support) | before Phase 7 could select Cozo |
 | Grafeo: probe tier-constraint enforceability (ADR-0009) and G050 behaviour at depth/scale | Phase 1b |
 | agdb: `Distance` counts nodes+edges — depth-5 subgroup traversal ≈ distance 10; encode in harness | Phase 1b |
 | MemoryRepo enforces the confirmed restrictive intersection (single writer, no read-during-write, no cross-hop predicates) | Phase 2 |
 | Ask owner: what did "forGQL" refer to? Confirm "LoraGraph"=LoraDB, "IndraGraph"=IndraDB readings | next owner touchpoint |
-| Watch-list: Cozo (if maintenance resumes) and GraphLite (if development resumes) warrant re-screen | Phase 7 at latest |
+| Watch-list: GraphLite (if development resumes) warrants re-screen; Cozo moved off the watch-list into Phase 1b by the owner amendment | Phase 7 at latest |
