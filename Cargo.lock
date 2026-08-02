@@ -361,6 +361,9 @@ name = "muster-sdk"
 version = "0.1.0"
 dependencies = [
  "orrery",
+ "proptest",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]
