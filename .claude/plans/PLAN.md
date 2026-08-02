@@ -85,6 +85,11 @@ bindings, so it costs little extra and doubles as a bindings smoke test.
 
 Output: `phases/01b-screening.md`, 2 finalists.
 
+> *Amended 2026-08-02 (plan review): Stage B closed with **no eliminations —
+> all three candidates advanced** (phases/01b). The 3→2 narrowing now happens
+> at Phase-7 entry as an explicit down-select; see the ADR-0021 addendum and
+> the Phase 7 section below.*
+
 ### Phase 3 — Detectors and derivation
 Every detector as a pure function with a brute-force property-test oracle.
 Derived expansion with per-hop temporal filtering. Salsa incrementality. Digests.
@@ -109,6 +114,24 @@ Muster surfaces in dependency order: member self-selection → coordinator group
 
 Output: `phases/06-app.md`.
 
+### Phase 6a — Engine surfaces for the app (parallel with Phase 6)
+*Added 2026-08-02 (plan review CR-2/CR-4): this work was promised by the
+ROADMAP (orrery "○ compute" preview; Orrery Alpha analytics) but owned by no
+phase.* Orrery-side work Muster's later slices consume, run alongside
+Phase 6 the way 1b ran alongside 3–5:
+
+1. **Non-persisting digest dry-run** (expectation/membership overlay →
+   change-set preview; must equal post-commit `refresh_digests` — the
+   muster/SPEC-03 honesty gate). Blocks the Muster **Alpha** slice.
+2. **Analytics surface**: engagement, capacity pressure, divergence,
+   bounded 2-hop co-attendance (orrery/SPEC-02 FRs; 2-hop budget
+   pre-committed in orrery/SPEC-03). Blocks the Muster **Beta** slice.
+3. Define the 10⁵ budget set the Orrery Alpha gate references (or restate
+   the gate at 10⁶) — the stage is unexitable as currently written.
+
+Output: `phases/06a-engine-surfaces.md` (pre-committed at entry, per
+convention).
+
 ### Phase 7 — Hardening and the ADR-0015 decision
 Repository implementations for both finalists. Differential testing against
 `MemoryRepo` and each other. Benchmark **through the real engine** — mixed
@@ -117,6 +140,19 @@ of which the Phase-0 harness exercised. Privacy boundary tests. Deterministic
 rebuild verification.
 
 **Close ADR-0015 here**, against the criteria pre-committed in Phase 1a.
+
+*Amended 2026-08-02 (plan review): Phase 7 additionally opens with an
+explicit **down-select from the three Stage-C survivors to two finalists**
+(ADR-0021 addendum) before any repository implementation, and its
+pre-commitment must cover the full dossier consolidated in
+`CARRY-FORWARD.md` (Phase 7 section) — notably the **external-writer
+cache-invalidation posture** (ADR-0015 criterion 6: the salsa mirror
+invalidates only through its own `Engine`; a second writer process silently
+desynchronises digests from detection), the `expired_membership_effect`
+producer decision (build the persisted derived cache, or re-scope/withdraw
+the detector by ADR), the deterministic rebuild **operation** design (only
+its verification was named here before), and the Cozo fork-readiness plan.
+Dropping any dossier item requires a written waiver (Rule 01.2).*
 
 Output: `phases/07-hardening.md`, ADR-0015 `accepted` or `rejected`.
 

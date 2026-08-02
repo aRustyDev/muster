@@ -79,8 +79,12 @@ ADR-0015 paper screen (Phase 1a, hours)
             SDK PoC ──────────> SDK Prototype ──> SDK Alpha ──> SDK Beta
                  │                                     │
                  v                                     v
-            Muster PoC ─────────────────────> Muster Prototype ──> Alpha ──> Beta ──> MVP
+            Muster PoC ──> Prototype ──> Alpha ──> Muster Beta ──> MVP
 ```
+
+*(Diagram corrected 2026-08-02: the SDK-Alpha arrow lands on Muster **Beta**
+— room assignment — matching the hard-deps list below; it previously pointed
+at Muster Prototype, which needs no SDK at all.)*
 
 Hard dependencies:
 
@@ -94,6 +98,17 @@ Hard dependencies:
 * Blast-radius preview needs salsa early cutoff; without it the preview is a full
   recompute and too slow for interactive use.
 * Room assignment in Muster Beta needs SDK Alpha local search.
+* *(Added 2026-08-02, plan review)* **Muster Alpha needs the non-persisting
+  digest dry-run and Muster Beta needs the engine analytics surface — both
+  are orrery work owned by Phase 6a (PLAN.md), which therefore blocks those
+  Muster slices.** Neither dependency was recorded here before, and the
+  analytics one was contradictorily placed (Alpha in muster/SPEC-02:21,
+  Beta everywhere else — now aligned to Beta).
+* *(Added 2026-08-02, plan review)* Several unbuilt-stage exit gates are not
+  yet measurable as written (SDK Beta churn instance, SDK RC perf gates,
+  Muster Beta "full track", both MVP human-outcome gates). Each stage's
+  entry pre-commitment must define its gate before work starts —
+  the debts are itemised in `CARRY-FORWARD.md`.
 
 ## Deferred
 

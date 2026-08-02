@@ -45,4 +45,9 @@ temptation).
 | Alpha | coordinator flow complete |
 | Beta | full track scheduled end to end |
 | MVP | a real coordinator uses it unaided |
-| RC | privacy assertions automated and green; accessibility; ops docs |
+| RC | privacy assertions automated and green; accessibility; ops docs; backup/restore |
+
+*(RC row completed 2026-08-02 — backup/restore was in the ROADMAP RC
+contents but missing here. The Beta "full track" and MVP "unaided" gates
+still need pre-committed definitions at stage entry: CARRY-FORWARD.md,
+review MO-8.)*

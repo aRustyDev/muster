@@ -42,4 +42,10 @@
 | Prototype | assignment + breakdown returned |
 | Alpha | local search improves on greedy for heterogeneous rooms |
 | Beta | re-solve changes < 10% for one room removal |
+| MVP | explain-assignment; organiser accepts a suggestion unedited |
 | RC | CP-SAT integrated **or** rejection documented |
+
+*(MVP row added 2026-08-02 — it existed in the ROADMAP but not here. The
+Beta churn gate and the MVP/RC gates still need pre-committed definitions
+— instance class, scale, trial protocol, and the SDK perf gates the RC
+gate references (none exist yet): CARRY-FORWARD.md, review MO-8.)*

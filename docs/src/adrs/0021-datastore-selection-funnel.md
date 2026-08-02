@@ -75,3 +75,21 @@ implementation prevents that more cheaply than either real store.
 * Benchmarking through the real engine measures realistic workload shape —
   mixed read/write, transactions, salsa interleaving, and realistic result-set
   sizes — none of which the Phase-0 harness exercised.
+
+## Addendum (2026-08-02 — Stage B outcome vs the "2 finalists" plan)
+
+Stage B closed with **no eliminations**: all three Stage-A survivors
+(Grafeo, agdb, Cozo) advanced, because none hit the pre-committed
+order-of-magnitude criterion (phases/01b-screening.md). This document's
+"decide between 2 finalists" and "three repository implementations total"
+arithmetic therefore no longer describes reality unaided.
+
+**Resolution:** Stage C opens with an explicit **down-select from 3 to 2**,
+decided against the Phase-7 dossier (`CARRY-FORWARD.md`: Stage-B
+quantitative profiles, grafeo's qualitative findings and L-scale trend,
+Cozo's dormancy/fork-readiness plan) before any repository implementation
+begins. This preserves the cost bound above. Implementing all three
+(four repositories total including `MemoryRepo`) would invalidate that
+arithmetic and requires superseding this ADR, not a commit message.
+The owner may of course direct the latter; the queue item is recorded in
+`CARRY-FORWARD.md`.

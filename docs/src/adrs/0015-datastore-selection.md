@@ -108,6 +108,19 @@ in advance. Additionally:
    restrictive than SQLite WAL. Verify each candidate.)*
 4. ACID transactions.
 5. Maintenance signal: contributors, release cadence, funding model.
+6. *(Added 2026-08-02 — after Stage B, before any Stage-C work; recorded
+   per Rule 01.2 rather than slipped in silently. Plan review CR-1.)*
+   **External-writer cache-invalidation posture.** The engine's salsa
+   mirror invalidates only through its own `Engine::apply`; a second
+   writer process against a shared store silently desynchronises digests
+   from detection (sweep reads the store directly, the derive chain does
+   not). For each candidate, the Stage-C evaluation must state which is
+   true of the intended deployment: (a) the store's concurrency model
+   structurally guarantees a single writer process (e.g. exclusive-writer
+   locking), (b) the store provides a change signal the mirror can
+   consume, or (c) the deployment accepts a documented single-Engine
+   constraint enforced outside the engine. "Unexamined" is not an option;
+   this criterion adds a requirement and relaxes nothing pre-committed.
 
 ### Consequences
 

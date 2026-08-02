@@ -20,6 +20,10 @@ worlds. Invariants:
 canonical query set against both on identical data and assert equality. In the
 spike this caught nothing because results agreed exactly — that agreement is
 the evidence the harness is wired correctly, and it must be maintained.
+*(Qualified 2026-08-02, Rule 01.4: "agreed exactly" is true of the
+**corrected** run only — as shipped, Q1 disagreed 44 vs 58 until the
+depth-0 semantics fix; phases/00-grounding.md. The claim had hardened while
+propagating.)*
 
 **Incremental correctness.** Salsa-derived results must equal a cold
 recomputation after an arbitrary mutation sequence. Fuzz the sequence.
@@ -55,6 +59,12 @@ per-hop temporal filtering from whole-path post-filtering.
 |---|---|
 | PoC | canonical queries run; per-hop filtering verified on the chosen store |
 | Prototype | all detectors implemented; property tests green |
-| Alpha | benchmarks within budget at 10⁵; two repository impls agree |
-| Beta | benchmarks within budget at 10⁶; incremental correctness fuzz green |
+| Alpha | benchmarks within budget at 10⁵ |
+| Beta | benchmarks within budget at 10⁶; incremental correctness fuzz green; two repository impls agree |
 | RC | privacy boundary tested; deterministic rebuild verified; docs complete |
+
+*(Corrected 2026-08-02, plan review MO-3: "two repository impls agree"
+moved Alpha → Beta — the second implementation is a Beta gate everywhere
+else (ROADMAP, ADR-0021:74); this table alone placed it a stage early.
+Note the Alpha budget row still needs a 10⁵ budget set defined — the
+SPEC-03 table is measured at 10⁶; owned by Phase 6a, see CARRY-FORWARD.)*

@@ -18,7 +18,7 @@ DTO mapping, and orchestration — never feasibility logic (Rule 03).
 | Blast preview (B) | `preview_expectation(...) -> Vec<PersonId>` | dry-run: digests before vs after on a scratch evaluation — **preview must equal the post-commit change set** (muster/SPEC-03 gate) |
 | Violation inbox (C) | `inbox(filter)` · `waive(id, by, reason)` | `repo.open_violations` · `WaiveViolation` |
 | Room assignment (D) | `suggest_rooms(requests, rooms, opts)` | `muster_sdk::suggest_and_refine` |
-| Capacity / engagement / divergence (E) | `capacity(window)` · `engagement(group, window)` · `divergence(group, window)` | engine analytics (Phase 6 Alpha; engine surface lands then) |
+| Capacity / engagement / divergence (E) | `capacity(window)` · `engagement(group, window)` · `divergence(group, window)` | engine analytics — consumed at Muster **Beta**; engine surface lands in **Phase 6a** *(corrected 2026-08-02: this row said "Phase 6 Alpha", contradicting the slicing below and both ROADMAPs)* |
 | Notifications | `pending_changes() -> ChangeSet` | `muster_sdk::batch::run` output; **delivery** is this crate's job and no one else's |
 | Locations (admin) | `add_location` · `add_containment` · `add_traverse` | the corresponding commands (tier rules enforce themselves) |
 

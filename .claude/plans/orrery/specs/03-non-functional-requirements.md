@@ -35,7 +35,9 @@ bottlenecks and conflating them misleads.
 * Interval algebra fuzz-tested against a reference implementation
 * Cross-engine differential testing where two repository implementations exist
   — this caught nothing in the spike because results agreed exactly, which is
-  itself the evidence the harness works
+  itself the evidence the harness works *(qualified 2026-08-02, Rule 01.4:
+  true of the corrected run only; as shipped, Q1 disagreed 44 vs 58 —
+  phases/00-grounding.md)*
 
 ## Security and privacy
 

@@ -111,7 +111,13 @@ detector called in the engine's apply gate.
 ## Design invariants carried forward
 
 * `feasible(person, e1, e2)` lands with Phase 4 travel, `person` ignored
-  until ADR-0017; caches key on `(profile_id, from, to)`.
+  until ADR-0017. Two caches, two keys *(distinguished 2026-08-02, plan
+  review MO-6 — the conflation was drifting against Rule 00.5)*: the
+  **Layer-2 travel cache** keys on `(profile_id, from, to)` (location
+  pair; as built, profile-less via `travel_best`); any future
+  **feasibility-verdict cache** keys on `(profile_id, e1, e2)` (event
+  pair) per Rule 00.5 / ADR-0017 — keying verdicts any other way is an
+  ADR, not a comment.
 * Every evaluation instant is caller-supplied — determinism and replay.
 * No `unwrap`/`expect` outside tests (Rule 04); constraint violations are
   typed errors naming the constraint (Rule 00b).
