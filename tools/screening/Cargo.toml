@@ -1,0 +1,24 @@
+# Phase 1b screening harness (ADR-0021 Stage B) — THROWAWAY BY DESIGN.
+# Standalone workspace: the [workspace] table below keeps this crate out of
+# the repository root workspace (root Cargo.toml also `exclude`s this path).
+# Rule 06: candidate datastore dependencies live here and only here.
+[package]
+name = "screening"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+anyhow = "1"
+# 0.9 pairing: rand 0.10 no longer pairs with rand_chacha (uses chacha20
+# internally); rand_chacha 0.9 + rand 0.9 is the compatible seeded pairing.
+rand = "0.9"
+rand_chacha = "0.9"
+grafeo = "0.5"
+agdb = "0.13"
+cozo = { version = "0.7", default-features = false, features = ["graph-algo"] }
+
+[profile.release]
+debug = false

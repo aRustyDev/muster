@@ -27,7 +27,7 @@ Three hypotheses were refuted during that work. Expect more.
 | Change detection | settled — ADR-0016 |
 | Product boundaries | settled — ADR-0019 |
 | Cascade analytic | withdrawn — ADR-0020 |
-| **Datastore** | **OPEN — ADR-0015**; funnel settled — ADR-0021; Stage A complete (phases/01a) — Grafeo, agdb, Cozo advance |
+| **Datastore** | **OPEN — ADR-0015**; funnel: Stage A complete (phases/01a), Stage B complete (phases/01b — no eliminations; all three to Stage C; qualitative findings against grafeo) |
 | Rust graph landscape | surveyed — RESEARCH-0005 Stage A findings + 20 scorecards |
 | Repository trait shape | sync — ADR-0023 |
 | Implementation | Phase 2 complete (phases/02-workspace.md); Phases 1b/3 next |

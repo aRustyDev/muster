@@ -1,0 +1,121 @@
+warning: method `name` is never used
+  --> src/engine.rs:10:8
+   |
+ 9 | pub trait Engine {
+   |           ------ method in this trait
+10 |     fn name(&self) -> &'static str;
+   |        ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `screening` (bin "screening") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.35s
+     Running `target/release/screening S M L`
+=== smoke tests (fresh instances) ===
+  grafeo   CRUD smoke: PASS
+  grafeo   temporal micro-fixture: PASS (q1: FALLBACK 6 fixed-depth statements; count client-side [probe: composite {0,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id); union-quant {1,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id)])
+  agdb     CRUD smoke: PASS
+  agdb     temporal micro-fixture: PASS (q2 pair-join and q7b per-event union computed in Rust (builder has no join surface); q2 count-only ~= materialised by construction)
+  cozo     CRUD smoke: PASS
+  cozo     temporal micro-fixture: PASS (mem engine; q1 depth bound via explicit counter d<=5; attends:by_event index used explicitly in q7b (ix_att_e parity))
+
+=== SCALE S — persons=100 events=200 groups=10 member_of=210 subgroup_of=9 expects=37 attends=1000 (ChaCha8 seed 42) ===
+  grafeo   load:       1.0 ms
+  agdb     load:       3.5 ms
+  cozo     load:       2.1 ms
+  differential: IDENTICAL result sets across 3 engines, 10 pids x q1/q2/q7b (aggregate rows compared: q1=125 q2=2 q7b=122)
+  q1 secondary bench pid: 1 (|q1| = 18)
+
+  query (pid=7)                                  grafeo                           agdb                           cozo
+  ---------------------------------------------------------------------------------------------------------------------
+  q1 materialised             0.23/0.24      n=12 h=6dc4d9e42c999740      0.05/0.06      n=12 h=6dc4d9e42c999740      0.55/0.59      n=12 h=6dc4d9e42c999740
+  q1 pid=1 materialised       0.28/0.31      n=18 h=07697fcb737f6e09      0.07/0.07      n=18 h=07697fcb737f6e09      0.60/0.67      n=18 h=07697fcb737f6e09
+  q2 materialised             0.62/0.75      n=0 h=bd60acb658c79e45      0.02/0.02      n=0 h=bd60acb658c79e45      0.13/0.16      n=0 h=bd60acb658c79e45
+  q7b materialised            0.09/0.11      n=19 h=aeaf0a93f9d417df      0.04/0.05      n=19 h=aeaf0a93f9d417df      0.28/0.34      n=19 h=aeaf0a93f9d417df
+  q1 count-only                 0.22/0.26      count=12        0.05/0.05      count=12        0.39/0.41      count=12
+  q1 pid=1 count-only           0.23/0.30      count=18        0.05/0.07      count=18        0.38/0.51      count=18
+  q2 count-only                  0.60/0.71      count=0         0.01/0.02      count=0         0.11/0.13      count=0
+  q7b count-only                0.08/0.11      count=19        0.03/0.04      count=19        0.18/0.22      count=19
+
+  load summary: grafeo=1ms  agdb=4ms  cozo=2ms
+  note[grafeo]: q1: FALLBACK 6 fixed-depth statements; count client-side [probe: composite {0,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id); union-quant {1,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id)]
+  note[agdb]: q2 pair-join and q7b per-event union computed in Rust (builder has no join surface); q2 count-only ~= materialised by construction
+  note[cozo]: mem engine; q1 depth bound via explicit counter d<=5; attends:by_event index used explicitly in q7b (ix_att_e parity)
+
+=== SCALE M — persons=2000 events=2000 groups=60 member_of=4018 subgroup_of=59 expects=303 attends=100000 (ChaCha8 seed 42) ===
+  grafeo   load:      81.5 ms
+  agdb     load:     204.8 ms
+  cozo     load:     166.9 ms
+  differential: IDENTICAL result sets across 3 engines, 10 pids x q1/q2/q7b (aggregate rows compared: q1=196 q2=114 q7b=4885)
+  q1 secondary bench pid: 23 (|q1| = 44)
+
+  query (pid=7)                                  grafeo                           agdb                           cozo
+  ---------------------------------------------------------------------------------------------------------------------
+  q1 materialised             0.32/0.33      n=0 h=bd60acb658c79e45      0.05/0.05      n=0 h=bd60acb658c79e45      0.16/0.20      n=0 h=bd60acb658c79e45
+  q1 pid=23 materialised      0.41/0.47      n=44 h=ceae0e6039910c18      0.13/0.15      n=44 h=ceae0e6039910c18      0.72/0.88      n=44 h=ceae0e6039910c18
+  q2 materialised            36.11/36.79     n=10 h=17a2336f0be5a9a8      0.06/0.08      n=10 h=17a2336f0be5a9a8      0.97/1.02      n=10 h=17a2336f0be5a9a8
+  q7b materialised            1.99/2.40      n=355 h=395318b2c2cf730c      0.34/0.56      n=355 h=395318b2c2cf730c      0.30/0.32      n=355 h=395318b2c2cf730c
+  q1 count-only                  0.29/0.33      count=0         0.05/0.05      count=0         0.15/0.22      count=0
+  q1 pid=23 count-only          0.39/0.46      count=44        0.12/0.14      count=44        0.39/0.57      count=44
+  q2 count-only                36.54/36.85     count=10        0.05/0.08      count=10        0.82/0.87      count=10
+  q7b count-only               2.02/2.39      count=355       0.27/0.49      count=355       0.26/0.36      count=355
+
+  load summary: grafeo=82ms  agdb=205ms  cozo=167ms
+  note[grafeo]: q1: FALLBACK 6 fixed-depth statements; count client-side [probe: composite {0,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id); union-quant {1,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id)]
+  note[agdb]: q2 pair-join and q7b per-event union computed in Rust (builder has no join surface); q2 count-only ~= materialised by construction
+  note[cozo]: mem engine; q1 depth bound via explicit counter d<=5; attends:by_event index used explicitly in q7b (ix_att_e parity)
+
+=== SCALE L — persons=10000 events=10000 groups=200 member_of=19980 subgroup_of=199 expects=921 attends=1000000 (ChaCha8 seed 42) ===
+  grafeo   load:    1332.2 ms
+  agdb     load:    2260.8 ms
+  cozo     load:    1476.0 ms
+  differential: IDENTICAL result sets across 3 engines, 10 pids x q1/q2/q7b (aggregate rows compared: q1=353 q2=550 q7b=22091)
+  q1 secondary bench pid: 1 (|q1| = 64)
+
+  query (pid=7)                                  grafeo                           agdb                           cozo
+  ---------------------------------------------------------------------------------------------------------------------
+  q1 materialised             1.23/1.27      n=22 h=0d98808128d004d5      0.14/0.17      n=22 h=0d98808128d004d5      0.48/0.61      n=22 h=0d98808128d004d5
+  q1 pid=1 materialised       1.39/1.53      n=64 h=acec52ce1ca719aa      0.22/0.27      n=64 h=acec52ce1ca719aa      0.52/0.64      n=64 h=acec52ce1ca719aa
+  q2 materialised           436.01/459.19    n=62 h=56b61b5f83134ae7      0.11/0.15      n=62 h=56b61b5f83134ae7      3.11/3.20      n=62 h=56b61b5f83134ae7
+  q7b materialised           10.25/10.60     n=2172 h=3b6dcd617f95dfba      2.69/3.92      n=2172 h=3b6dcd617f95dfba      1.01/1.20      n=2172 h=3b6dcd617f95dfba
+  q1 count-only                 1.15/1.25      count=22        0.14/0.16      count=22        0.53/0.69      count=22
+  q1 pid=1 count-only           1.20/1.40      count=64        0.21/0.26      count=64        0.61/0.68      count=64
+  q2 count-only               429.87/441.21    count=62        0.11/0.17      count=62        2.96/3.14      count=62
+  q7b count-only              8.54/10.15     count=2172      1.59/2.84      count=2172      0.73/0.97      count=2172
+
+  load summary: grafeo=1332ms  agdb=2261ms  cozo=1476ms
+  note[grafeo]: q1: FALLBACK 6 fixed-depth statements; count client-side [probe: composite {0,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){0,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id); union-quant {1,5} ERROR: grafeo: syntax error: [GQL] Expected RETURN, FINISH, or SELECT
+  --> query:1:49
+   |
+ 1 | MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id
+   |                                                 ^ (query: MATCH (p:Person {id: 0})-[m:member_of]->(g0:Grp)((qa:Grp)-[qr:subgroup_of]->(qb:Grp) WHERE qr.valid_from <= 604800 AND qr.valid_to >= 604800){1,5}(g:Grp)-[x:expects]->(e:Event) WHERE m.valid_from <= 604800 AND m.valid_to >= 604800 AND x.valid_from <= 604800 AND x.valid_to >= 604800 RETURN DISTINCT e.id)]
+  note[agdb]: q2 pair-join and q7b per-event union computed in Rust (builder has no join surface); q2 count-only ~= materialised by construction
+  note[cozo]: mem engine; q1 depth bound via explicit counter d<=5; attends:by_event index used explicitly in q7b (ix_att_e parity)
