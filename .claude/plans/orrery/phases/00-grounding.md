@@ -18,7 +18,7 @@ reproduced-with-correction, or refuted — rather than trusted.
 All numbers below: `./evidence/run_all.sh`, this host (macOS / Darwin 25.4.0,
 Apple Silicon), Python 3.12.x venv (uv), **ladybug 0.19.0 (PyPI)**, **SQLite
 3.53.1** (published run used SQLite 3.45). Scales as noted; L = 1M `attends`
-edges. Log: session scratchpad `run_all.log`; artefacts `evidence/_work/`.
+edges. Log: `evidence/runs/2026-08-01-run_all-macos-arm64.log`; artefacts `evidence/_work/`.
 This host is uniformly ~2.5–3× faster than the published host, so absolute
 latencies are compared by ratio, not value.
 

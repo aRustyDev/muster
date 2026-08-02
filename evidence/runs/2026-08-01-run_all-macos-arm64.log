@@ -1,0 +1,146 @@
+== install ==
+== probe 1: stop-gate ==   (~10s)
+==============================================================================
+SETUP: group hierarchy with temporally-bounded membership edges
+==============================================================================
+
+Ground truth @ t=150: p1 -> g1 -> {g2, g3, g4}. g5 MUST be excluded.
+
+==============================================================================
+PROBE A: unfiltered variable-length baseline
+==============================================================================
+  [OK]   var-length *1..5: [['g2'], ['g3'], ['g4'], ['g5']]
+
+==============================================================================
+PROBE B: PER-HOP edge predicate  <-- THE STOP GATE
+==============================================================================
+  [OK]   Kuzu (r,n | WHERE ...) syntax: [['g2'], ['g3'], ['g4']]
+  [FAIL] inline WHERE in rel pattern: Parser exception: Invalid input <MATCH (p:Person)-[:member_of]->(:Grp)-[e:subgroup_of*1..5 WHERE>: expected rule oC_SingleQuery (line: 1, offset: 58)
+
+==============================================================================
+PROBE C: whole-path post-filter (the fallback if B fails)
+==============================================================================
+  [OK]   ALL(... IN rels(path)): [['g2'], ['g3'], ['g4']]
+
+==============================================================================
+PROBE D: temporal MONOTONICITY across hops (Q7 cascade requirement)
+==============================================================================
+  [OK]   increasing property along path: [['g2', 1], ['g3', 2], ['g4', 3], ['g5', 2]]
+
+==============================================================================
+PROBE E: path functions + shortest path
+==============================================================================
+  [OK]   SHORTEST: [[3]]
+  [OK]   ALL SHORTEST: [[3]]
+  [FAIL] WSHORTEST (weighted): Cannot evaluate expression with type PROPERTY.
+== spike S ==              (~5s)
+-- tier constraint verification (isolated db) --
+  PASS  traverse Room->Room            (legal)         -> accepted
+  PASS  transit  Structure->Structure  (legal)         -> accepted
+  PASS  transit  Room->Room            (MUST REJECT)   -> rejected
+  PASS  traverse Room->Structure       (MUST REJECT)   -> rejected
+  PASS  within   Structure->Room       (MUST REJECT: inverted tier) -> rejected
+
+==============================================================================
+SCALE S  {'persons': 100, 'events': 200, 'rooms': 20, 'structs': 5, 'campus': 2, 'groups': 10, 'per_person': 10}
+==============================================================================
+generate: 0.0s  {'person': 100, 'event': 200, 'room': 20, 'attends': 1000, 'held': 210, 'member_of': 206, 'expects': 41, 'traverse': 80}
+
+load: 0.3s   on-disk: 3 MB   (1,000 attends edges)
+
+query                                      median        max   result
+------------------------------------------------------------------------------
+Q1 derived expansion  (per-person)          1.4ms      9.5ms   7
+Q2 conflict detect    (per-person)          0.7ms      2.0ms   1
+Q3 conflict sweep     (GLOBAL)              1.9ms      2.1ms   47
+Q4 impossible travel  (per-person)          1.0ms      5.6ms   0
+Q5 room exclusivity   (GLOBAL)              1.2ms      1.2ms   13
+Q6 travel path        (shortest)            0.4ms      1.5ms   1
+Q6b cross-bldg decomposed                   0.5ms      1.2ms   1697
+Q7 cascade 3-hop      (per-person)          0.8ms      1.3ms   230
+Q7b co-attend 2-hop   (windowed)            0.8ms      1.2ms   21
+== spike M ==              (~30s)
+-- tier constraint verification (isolated db) --
+  PASS  traverse Room->Room            (legal)         -> accepted
+  PASS  transit  Structure->Structure  (legal)         -> accepted
+  PASS  transit  Room->Room            (MUST REJECT)   -> rejected
+  PASS  traverse Room->Structure       (MUST REJECT)   -> rejected
+  PASS  within   Structure->Room       (MUST REJECT: inverted tier) -> rejected
+
+==============================================================================
+SCALE M  {'persons': 2000, 'events': 2000, 'rooms': 200, 'structs': 20, 'campus': 3, 'groups': 60, 'per_person': 50}
+==============================================================================
+generate: 0.1s  {'person': 2000, 'event': 2000, 'room': 200, 'attends': 100000, 'held': 2159, 'member_of': 4020, 'expects': 282, 'traverse': 2180}
+
+load: 0.4s   on-disk: 10 MB   (100,000 attends edges)
+
+query                                      median        max   result
+------------------------------------------------------------------------------
+Q1 derived expansion  (per-person)          1.7ms      8.5ms   13
+Q2 conflict detect    (per-person)          0.7ms      2.0ms   7
+Q3 conflict sweep     (GLOBAL)             60.3ms     60.4ms   25802
+Q4 impossible travel  (per-person)          1.4ms      5.7ms   0
+Q5 room exclusivity   (GLOBAL)              1.8ms      1.8ms   113
+Q6 travel path        (shortest)            0.4ms      1.6ms   1
+Q6b cross-bldg decomposed                   0.5ms      1.2ms   438
+Q7 cascade 3-hop      (per-person)         16.4ms     17.5ms   3461
+Q7b co-attend 2-hop   (windowed)            1.2ms      6.2ms   653
+== probe 2: saturation ==  (~60s)
+population: 2000 persons, 2000 events
+
+(a) SATURATION — reachable set by hop depth
+ depth   reached  % of graph     latency
+------------------------------------------
+     1        50        1.2%         5ms
+     2     1,511       37.8%         2ms
+     3     3,461       86.5%        18ms
+     4     4,000      100.0%      1044ms
+
+(b) TEMPORAL MONOTONICITY — can a hop reference the previous hop?
+  [OK]   constant-bound filter (all hops after T)
+         -> 3,515 reached in 529ms
+  [FAIL] cross-hop: reference prev edge via alias
+         -> Binder exception: Variable e is not in scope.
+  [FAIL] cross-hop: ordered pairs over rels(path)
+         -> Parser exception: Invalid input <MATCH path = (p:Person)-[e:attends*1..4]-(x) WHERE p.id=7 AND ALL(i IN range(
+
+(c) BOUNDED ALTERNATIVE — 2-hop co-attendance with time window
+  2-hop, windowed: 653 persons in 2ms
+== spike L ==              (~4min)
+-- tier constraint verification (isolated db) --
+  PASS  traverse Room->Room            (legal)         -> accepted
+  PASS  transit  Structure->Structure  (legal)         -> accepted
+  PASS  transit  Room->Room            (MUST REJECT)   -> rejected
+  PASS  traverse Room->Structure       (MUST REJECT)   -> rejected
+  PASS  within   Structure->Room       (MUST REJECT: inverted tier) -> rejected
+
+==============================================================================
+SCALE L  {'persons': 10000, 'events': 10000, 'rooms': 500, 'structs': 40, 'campus': 4, 'groups': 200, 'per_person': 100}
+==============================================================================
+generate: 1.6s  {'person': 10000, 'event': 10000, 'room': 500, 'attends': 1000000, 'held': 10840, 'member_of': 20086, 'expects': 895, 'traverse': 7320}
+
+load: 13.5s   on-disk: 41 MB   (1,000,000 attends edges)
+
+query                                      median        max   result
+------------------------------------------------------------------------------
+Q1 derived expansion  (per-person)          1.9ms      9.9ms   44
+Q2 conflict detect    (per-person)          1.2ms      2.4ms   60
+Q3 conflict sweep     (GLOBAL)            730.6ms    765.8ms   514122
+Q4 impossible travel  (per-person)          1.9ms     10.7ms   1
+Q5 room exclusivity   (GLOBAL)              5.2ms      6.0ms   1231
+Q6 travel path        (shortest)            0.4ms      1.7ms   1
+Q6b cross-bldg decomposed                   0.5ms      1.5ms   2374
+Q7 cascade 3-hop      (per-person)        136.5ms    150.7ms   16411
+Q7b co-attend 2-hop   (windowed)            3.9ms     10.2ms   2808
+== sqlite head-to-head ==  (~2min)
+SQLite load: 6.0s   on-disk: 123 MB   (1,000,000 attends rows)
+
+query                                             median   result
+------------------------------------------------------------------------
+Q2 conflict detect (per-person, b-tree)            0.2ms   60
+Q3 conflict sweep (GLOBAL, b-tree)              1380.0ms   514122
+Q3 conflict sweep (GLOBAL, R*Tree)              3438.5ms   514122
+Q5 room exclusivity (GLOBAL)                       4.8ms   1231
+Q7b co-attend 2-hop (windowed)                  2610.9ms   2808
+Q1 derived expansion (recursive CTE)               0.0ms   58
+== done. RESEARCH-0003 tables should reproduce within run-to-run noise. ==
