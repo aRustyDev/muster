@@ -21,6 +21,8 @@ tracing.workspace = true
 blake3.workspace = true
 # ADR-0022 baseline; incremental derivation (ADR-0016 C). Slice-2 H10.
 salsa.workspace = true
+# ADR-0022 baseline; Layer-1 pathfinding, in-memory (ADR-0006). Phase-4 H6.
+petgraph.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

@@ -24,6 +24,7 @@ uuid = { version = "1", features = ["v7", "serde"] }
 tracing = "0.1"
 blake3 = "1"
 salsa = "0.28"
+petgraph = "0.8"
 anyhow = "1"
 
 proptest = "1"

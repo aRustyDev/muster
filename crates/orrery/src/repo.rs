@@ -18,7 +18,7 @@ use crate::error::Result;
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
     Attends, Event, EventId, Expects, GroupId, Held, Location, LocationId, MemberOf, Mode, Person,
-    PersonId, SubgroupOf, TravelCost, Violation, Within,
+    PersonId, SubgroupOf, TravelCost, Traverse, Violation, Within,
 };
 
 /// Bound on `group_ancestors` traversal depth (orrery/SPEC-02: depth 5;
@@ -56,9 +56,17 @@ pub trait Repository: Send + Sync {
     /// Expectations attached to any of `groups`, valid at `at`.
     fn expectations(&self, groups: &[GroupId], at: Timestamp) -> Result<Vec<Expects>>;
 
-    /// Layer-2-style point lookup: cheapest traverse cost `from → to` for a
-    /// mode, if an edge exists.
+    /// Layer-2 point lookup for one mode: the closure cache when populated,
+    /// falling back to a direct-edge scan (Phase-3 behaviour) when not.
     fn travel(&self, from: LocationId, to: LocationId, mode: &Mode) -> Result<Option<TravelCost>>;
+
+    /// Best (minimum-duration) cost across all modes — what
+    /// impossible-travel judges against: a person who could have driven is
+    /// not accused because walking is slow.
+    fn travel_best(&self, from: LocationId, to: LocationId) -> Result<Option<TravelCost>>;
+
+    /// The full Layer-1 edge set — input to the closure computation.
+    fn traverse_all(&self) -> Result<Vec<Traverse>>;
 
     // -- sweep and mirror support (small full-set reads; entity sets are
     // -- the bounded dimension, edges are the unbounded one) --
@@ -67,6 +75,7 @@ pub trait Repository: Send + Sync {
     fn locations(&self) -> Result<Vec<LocationId>>;
     fn events(&self) -> Result<Vec<Event>>;
     fn attends_for_event(&self, id: EventId) -> Result<Vec<Attends>>;
+    fn held_for_event(&self, id: EventId) -> Result<Vec<Held>>;
     fn open_violations(&self) -> Result<Vec<Violation>>;
     fn memberships_all(&self) -> Result<Vec<MemberOf>>;
     fn subgroups_all(&self) -> Result<Vec<SubgroupOf>>;
