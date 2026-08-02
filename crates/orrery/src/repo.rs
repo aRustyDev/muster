@@ -17,7 +17,8 @@ use crate::command::{Command, CommandReceipt};
 use crate::error::Result;
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    Attends, Expects, GroupId, Held, LocationId, MemberOf, Mode, Person, PersonId, TravelCost,
+    Attends, Event, EventId, Expects, GroupId, Held, Location, LocationId, MemberOf, Mode, Person,
+    PersonId, TravelCost, Within,
 };
 
 /// Bound on `group_ancestors` traversal depth (orrery/SPEC-02: depth 5;
@@ -26,6 +27,14 @@ pub const MAX_GROUP_DEPTH: usize = 5;
 
 pub trait Repository: Send + Sync {
     fn person(&self, id: PersonId) -> Result<Option<Person>>;
+
+    fn event(&self, id: EventId) -> Result<Option<Event>>;
+
+    fn location(&self, id: LocationId) -> Result<Option<Location>>;
+
+    /// The full containment edge set — small (locations number in the
+    /// thousands) and needed whole by the containment-exclusivity detector.
+    fn containment(&self) -> Result<Vec<Within>>;
 
     /// `attends` edges for one person whose window overlaps `window` —
     /// entity-partitioned before the interval predicate, like every Orrery

@@ -66,9 +66,18 @@ pub enum Command {
         event: EventId,
         during: Interval,
         overflow_for: Option<LocationId>,
+        /// ADR-0018: capacity constraint is per-(location, event).
+        capacity_override: Option<u32>,
+    },
+    /// Containment edge; tier-ascending only, validated against the tier
+    /// module (ADR-0009) — illegal edges are rejected, not stored.
+    AddContainment {
+        child: LocationId,
+        parent: LocationId,
     },
     /// Writes both directed rows from this single call site so symmetric
-    /// values cannot drift (ADR-0008).
+    /// values cannot drift (ADR-0008). Sibling-tier rule validated unless
+    /// the edge carries `sibling_override` or touches a portal.
     AddTraversePair(Traverse),
     WaiveViolation {
         id: ViolationId,
@@ -92,6 +101,7 @@ impl Command {
             Command::AddSubgroup { .. } => "add_subgroup",
             Command::AddExpectation { .. } => "add_expectation",
             Command::HoldLocation { .. } => "hold_location",
+            Command::AddContainment { .. } => "add_containment",
             Command::AddTraversePair(_) => "add_traverse_pair",
             Command::WaiveViolation { .. } => "waive_violation",
         }

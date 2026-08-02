@@ -16,6 +16,9 @@ thiserror.workspace = true
 serde.workspace = true
 uuid.workspace = true
 tracing.workspace = true
+# ADR-0022 approved baseline; used for derived-edge content addressing
+# (ADR-0016 A). Recorded in phases/03-engine-core.md H4.
+blake3.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

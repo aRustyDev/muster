@@ -28,9 +28,10 @@ use crate::interval::{Interval, Timestamp};
 use crate::model::{
     AttendanceSource, Attends, EntityRef, Event, EventId, Expects, Group, GroupId, Held, Location,
     LocationId, MemberOf, Mode, Person, PersonId, Posture, SubgroupOf, TravelCost, Traverse,
-    Violation, ViolationId,
+    Violation, ViolationId, Within,
 };
 use crate::repo::{Repository, MAX_GROUP_DEPTH};
+use crate::tier;
 
 pub const SINGLE_WRITER: &str = "single-writer (MemoryRepo: restrictive candidate intersection)";
 pub const NO_READ_DURING_WRITE: &str =
@@ -48,6 +49,7 @@ struct State {
     subgroup_of: Vec<SubgroupOf>,
     expects: Vec<Expects>,
     traverse: Vec<Traverse>,
+    within: Vec<Within>,
     violations: HashMap<ViolationId, Violation>,
 }
 
@@ -83,6 +85,21 @@ impl Repository for MemoryRepo {
     fn person(&self, id: PersonId) -> Result<Option<Person>> {
         let _s = tracing::info_span!("repo.person", backend = "memory").entered();
         Ok(self.read()?.persons.get(&id).cloned())
+    }
+
+    fn event(&self, id: EventId) -> Result<Option<Event>> {
+        let _s = tracing::info_span!("repo.event", backend = "memory").entered();
+        Ok(self.read()?.events.get(&id).cloned())
+    }
+
+    fn location(&self, id: LocationId) -> Result<Option<Location>> {
+        let _s = tracing::info_span!("repo.location", backend = "memory").entered();
+        Ok(self.read()?.locations.get(&id).cloned())
+    }
+
+    fn containment(&self) -> Result<Vec<Within>> {
+        let _s = tracing::info_span!("repo.containment", backend = "memory").entered();
+        Ok(self.read()?.within.clone())
     }
 
     fn attends_for(&self, id: PersonId, window: Interval) -> Result<Vec<Attends>> {
@@ -282,17 +299,60 @@ impl Repository for MemoryRepo {
                 event,
                 during,
                 overflow_for,
+                capacity_override,
             } => {
+                if !state.locations.contains_key(&location) {
+                    return Err(OrreryError::NotFound(EntityRef::Location(location)));
+                }
+                if !state.events.contains_key(&event) {
+                    return Err(OrreryError::NotFound(EntityRef::Event(event)));
+                }
                 state.held.push(Held {
                     location,
                     event,
                     during,
                     posture: Posture::OnSite,
                     overflow_for,
-                    capacity_override: None,
+                    capacity_override,
                 });
             }
+            Command::AddContainment { child, parent } => {
+                let c = state
+                    .locations
+                    .get(&child)
+                    .ok_or(OrreryError::NotFound(EntityRef::Location(child)))?;
+                let p = state
+                    .locations
+                    .get(&parent)
+                    .ok_or(OrreryError::NotFound(EntityRef::Location(parent)))?;
+                if !tier::containment_legal(c.tier, p.tier) {
+                    return Err(OrreryError::CommandRejected {
+                        reason: format!(
+                            "within must be tier-ascending (ADR-0009): {:?} -> {:?}",
+                            c.tier, p.tier
+                        ),
+                    });
+                }
+                state.within.push(Within { child, parent });
+            }
             Command::AddTraversePair(t) => {
+                let a = state
+                    .locations
+                    .get(&t.from)
+                    .ok_or(OrreryError::NotFound(EntityRef::Location(t.from)))?;
+                let b = state
+                    .locations
+                    .get(&t.to)
+                    .ok_or(OrreryError::NotFound(EntityRef::Location(t.to)))?;
+                if !tier::traverse_legal(a, b, t.sibling_override) {
+                    return Err(OrreryError::CommandRejected {
+                        reason: format!(
+                            "traverse requires sibling tiers, a portal, or an explicit \
+                             override (ADR-0009): {:?} -> {:?}",
+                            a.tier, b.tier
+                        ),
+                    });
+                }
                 // Both directed rows from one call site (ADR-0008).
                 let reverse = Traverse {
                     from: t.to,
@@ -519,11 +579,25 @@ mod tests {
         assert!((div - 0.8).abs() < 1e-6, "divergence ~0.8, got {div}");
     }
 
+    fn room(name: &str) -> Location {
+        Location {
+            id: LocationId::new(),
+            name: name.into(),
+            tier: crate::model::Tier::Room,
+            portal: crate::model::Portal::None,
+            capacity: Some(40),
+            ext: Default::default(),
+        }
+    }
+
     /// ADR-0008: one command writes both directed rows.
     #[test]
     fn traverse_pair_writes_two_rows() {
         let repo = MemoryRepo::new();
-        let (a, b) = (LocationId::new(), LocationId::new());
+        let (ra, rb) = (room("a"), room("b"));
+        let (a, b) = (ra.id, rb.id);
+        repo.apply(Command::UpsertLocation(ra)).unwrap();
+        repo.apply(Command::UpsertLocation(rb)).unwrap();
         repo.apply(Command::AddTraversePair(Traverse {
             from: a,
             to: b,
@@ -534,10 +608,68 @@ mod tests {
             distance_m: None,
             provenance: crate::model::TravelProvenance::Estimated,
             computed_at: ts(0),
+            sibling_override: false,
         }))
         .unwrap();
         let walk = Mode("walk".into());
         assert_eq!(repo.travel(a, b, &walk).unwrap().unwrap().duration_s, 120);
         assert_eq!(repo.travel(b, a, &walk).unwrap().unwrap().duration_s, 120);
+    }
+
+    /// ADR-0009 at the command layer: inverted containment and cross-tier
+    /// traverse without portal/override are rejected with typed errors.
+    #[test]
+    fn tier_rules_enforced_at_write() {
+        let repo = MemoryRepo::new();
+        let r = room("r");
+        let bldg = Location {
+            id: LocationId::new(),
+            name: "bldg".into(),
+            tier: crate::model::Tier::Structure,
+            portal: crate::model::Portal::None,
+            capacity: None,
+            ext: Default::default(),
+        };
+        let (rid, bid) = (r.id, bldg.id);
+        repo.apply(Command::UpsertLocation(r)).unwrap();
+        repo.apply(Command::UpsertLocation(bldg)).unwrap();
+
+        // legal: room within structure
+        repo.apply(Command::AddContainment {
+            child: rid,
+            parent: bid,
+        })
+        .unwrap();
+        // inverted: rejected
+        assert!(matches!(
+            repo.apply(Command::AddContainment {
+                child: bid,
+                parent: rid
+            }),
+            Err(OrreryError::CommandRejected { .. })
+        ));
+        // cross-tier traverse without portal or override: rejected
+        let bad = Traverse {
+            from: rid,
+            to: bid,
+            mode: Mode("walk".into()),
+            duration_typical_s: 60,
+            duration_peak_s: None,
+            peak_window: None,
+            distance_m: None,
+            provenance: crate::model::TravelProvenance::Estimated,
+            computed_at: ts(0),
+            sibling_override: false,
+        };
+        assert!(matches!(
+            repo.apply(Command::AddTraversePair(bad.clone())),
+            Err(OrreryError::CommandRejected { .. })
+        ));
+        // same edge with the explicit override marker: accepted
+        repo.apply(Command::AddTraversePair(Traverse {
+            sibling_override: true,
+            ..bad
+        }))
+        .unwrap();
     }
 }
