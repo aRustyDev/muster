@@ -3,9 +3,8 @@
 | Phase | Scope for muster-sdk | Exit condition | Status |
 |---|---|---|---|
 | 02 | compiling stub crate in the workspace, scope guard (`check-scope`) | workspace builds | complete |
-| 05 | greedy assignment, objective composition, local search, batch orchestration | greedy matches brute force on fixed-start instances (n ≤ 12); phases/05-sdk.md | blocked by orrery Phase 3 (needs feasibility oracle AND scoring) |
+| 05 | greedy assignment, objective composition, local search, batch orchestration | greedy matches brute force on fixed-start instances (n ≤ 12); phases/05-sdk.md | slice 1 complete — PoC + Prototype gates met; slice 2 (search, stability, batch) open |
 
 Deferred: CP-SAT (SDK RC or documented rejection — OR-Tools Rust binding
 maturity unverified). Open question: 0005 (answered — approach), 0015 lives
-with muster. Specs still thin: data model, API surface, testing criteria are
-gaps to fill at Phase 5 entry (plans/README "known thin spots").
+with muster. Spec gap closed at Phase-5 entry: SPEC-02 (API + data model) and SPEC-03 (testing) written 2026-08-02.
