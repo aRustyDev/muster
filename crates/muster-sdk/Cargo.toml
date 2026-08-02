@@ -10,6 +10,9 @@ repository.workspace = true
 orrery.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+# Rule-06 baseline (stochastic search); enters in Phase 5 slice 2 with a
+# caller-supplied seed — no ambient randomness.
+rand.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true
