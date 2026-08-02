@@ -102,6 +102,66 @@ impl Repository for MemoryRepo {
         Ok(self.read()?.within.clone())
     }
 
+    fn persons(&self) -> Result<Vec<PersonId>> {
+        let _s = tracing::info_span!("repo.persons", backend = "memory").entered();
+        let mut v: Vec<PersonId> = self.read()?.persons.keys().copied().collect();
+        v.sort();
+        Ok(v)
+    }
+
+    fn locations(&self) -> Result<Vec<LocationId>> {
+        let _s = tracing::info_span!("repo.locations", backend = "memory").entered();
+        let mut v: Vec<LocationId> = self.read()?.locations.keys().copied().collect();
+        v.sort();
+        Ok(v)
+    }
+
+    fn events(&self) -> Result<Vec<Event>> {
+        let _s = tracing::info_span!("repo.events", backend = "memory").entered();
+        let mut v: Vec<Event> = self.read()?.events.values().cloned().collect();
+        v.sort_by_key(|e| e.id);
+        Ok(v)
+    }
+
+    fn attends_for_event(&self, id: EventId) -> Result<Vec<Attends>> {
+        let _s = tracing::info_span!("repo.attends_for_event", backend = "memory").entered();
+        Ok(self
+            .read()?
+            .attends
+            .iter()
+            .filter(|a| a.event == id)
+            .cloned()
+            .collect())
+    }
+
+    fn open_violations(&self) -> Result<Vec<Violation>> {
+        let _s = tracing::info_span!("repo.open_violations", backend = "memory").entered();
+        let mut v: Vec<Violation> = self
+            .read()?
+            .violations
+            .values()
+            .filter(|v| v.resolved_at.is_none())
+            .cloned()
+            .collect();
+        v.sort_by_key(|v| v.id);
+        Ok(v)
+    }
+
+    fn memberships_all(&self) -> Result<Vec<MemberOf>> {
+        let _s = tracing::info_span!("repo.memberships_all", backend = "memory").entered();
+        Ok(self.read()?.member_of.clone())
+    }
+
+    fn subgroups_all(&self) -> Result<Vec<SubgroupOf>> {
+        let _s = tracing::info_span!("repo.subgroups_all", backend = "memory").entered();
+        Ok(self.read()?.subgroup_of.clone())
+    }
+
+    fn expectations_all(&self) -> Result<Vec<Expects>> {
+        let _s = tracing::info_span!("repo.expectations_all", backend = "memory").entered();
+        Ok(self.read()?.expects.clone())
+    }
+
     fn attends_for(&self, id: PersonId, window: Interval) -> Result<Vec<Attends>> {
         let _s = tracing::info_span!("repo.attends_for", backend = "memory").entered();
         Ok(self
@@ -373,6 +433,23 @@ impl Repository for MemoryRepo {
                     crate::model::Actor::System => None,
                 };
             }
+            Command::RecordViolation(v) => {
+                state.violations.insert(v.id, v);
+            }
+            Command::ResolveViolation { id, at } => {
+                let v = state
+                    .violations
+                    .get_mut(&id)
+                    .ok_or(OrreryError::NotFound(EntityRef::Violation(id)))?;
+                v.resolved_at = Some(at);
+            }
+            Command::SetDerivedDigest { person, digest, at } => {
+                let p = state
+                    .persons
+                    .get_mut(&person)
+                    .ok_or(OrreryError::NotFound(EntityRef::Person(person)))?;
+                p.derived_digest = Some(crate::model::DigestRecord { digest, at });
+            }
         }
         Ok(CommandReceipt {
             seq: self.seq.fetch_add(1, Ordering::SeqCst) + 1,
@@ -396,6 +473,7 @@ mod tests {
         Person {
             id: PersonId::new(),
             name: name.into(),
+            derived_digest: None,
             ext: Default::default(),
         }
     }

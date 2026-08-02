@@ -17,7 +17,7 @@ use crate::repo::Repository;
 /// Content-addressed identity for a derived edge: stable across
 /// recomputation with unchanged inputs, so violations, pins, and overrides
 /// can reference it (ADR-0016).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct DerivedId(pub [u8; 32]);
 
 /// SPEC-01 gives expectations no surrogate id, so expectation identity is
@@ -35,6 +35,20 @@ pub fn derived_id(
     h.update(group.0.as_bytes());
     h.update(&expectation_start.0.to_le_bytes());
     DerivedId(*h.finalize().as_bytes())
+}
+
+/// Digest of a derived-edge id set (ADR-0016 B): blake3 over the sorted
+/// ids. Shared by the incremental chain and the cold recomputation path so
+/// the fuzz comparison (SPEC-05 incremental correctness) compares the id
+/// sets themselves.
+pub fn digest_of_ids(ids: &[DerivedId]) -> [u8; 32] {
+    let mut sorted: Vec<&DerivedId> = ids.iter().collect();
+    sorted.sort();
+    let mut h = blake3::Hasher::new();
+    for id in sorted {
+        h.update(&id.0);
+    }
+    *h.finalize().as_bytes()
 }
 
 /// A group-derived attendance edge, pre-reconciliation.
@@ -224,6 +238,7 @@ mod tests {
         repo.apply(Command::UpsertPerson(Person {
             id: person,
             name: "p".into(),
+            derived_digest: None,
             ext: Default::default(),
         }))
         .unwrap();

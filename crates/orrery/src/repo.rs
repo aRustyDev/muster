@@ -18,7 +18,7 @@ use crate::error::Result;
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
     Attends, Event, EventId, Expects, GroupId, Held, Location, LocationId, MemberOf, Mode, Person,
-    PersonId, TravelCost, Within,
+    PersonId, SubgroupOf, TravelCost, Violation, Within,
 };
 
 /// Bound on `group_ancestors` traversal depth (orrery/SPEC-02: depth 5;
@@ -59,6 +59,18 @@ pub trait Repository: Send + Sync {
     /// Layer-2-style point lookup: cheapest traverse cost `from → to` for a
     /// mode, if an edge exists.
     fn travel(&self, from: LocationId, to: LocationId, mode: &Mode) -> Result<Option<TravelCost>>;
+
+    // -- sweep and mirror support (small full-set reads; entity sets are
+    // -- the bounded dimension, edges are the unbounded one) --
+
+    fn persons(&self) -> Result<Vec<PersonId>>;
+    fn locations(&self) -> Result<Vec<LocationId>>;
+    fn events(&self) -> Result<Vec<Event>>;
+    fn attends_for_event(&self, id: EventId) -> Result<Vec<Attends>>;
+    fn open_violations(&self) -> Result<Vec<Violation>>;
+    fn memberships_all(&self) -> Result<Vec<MemberOf>>;
+    fn subgroups_all(&self) -> Result<Vec<SubgroupOf>>;
+    fn expectations_all(&self) -> Result<Vec<Expects>>;
 
     /// The only write path (Rule 00.2).
     fn apply(&self, cmd: Command) -> Result<CommandReceipt>;

@@ -49,11 +49,17 @@ Computed in exactly one place. Divergence
 ## Derived edge identity
 
 ```
-derived_id = blake3(person_id ‖ event_id ‖ expectation_id)
+derived_id = blake3(person_id ‖ event_id ‖ group_id ‖ expectation_window_start)
 ```
 
 Stable across recomputation so violations, pins, and overrides can reference
 derived edges (ADR-0016).
+
+> *Updated 2026-08-02 (Phase 3): the draft said `expectation_id`, but
+> expectations carry no surrogate id in this model — identity is
+> content-derived from the winning expectation's `(group, event,
+> during.start)`. Implemented in `derive::derived_id` and mirrored bit-for-bit
+> in the salsa chain (fuzz-verified, phases/03-engine-core.md H6).*
 
 ## Travel layers
 

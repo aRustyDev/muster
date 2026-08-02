@@ -51,7 +51,7 @@ id_newtype!(LocationId);
 id_newtype!(ViolationId);
 
 /// A typed reference to any entity — used in violation subjects and errors.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum EntityRef {
     Person(PersonId),
     Group(GroupId),
@@ -82,8 +82,19 @@ pub type Ext = BTreeMap<String, String>;
 pub struct Person {
     pub id: PersonId,
     pub name: String,
+    /// Persisted derivation digest (ADR-0016 B): hash of the sorted
+    /// derived-edge id set plus the instant it was computed at. Lives on
+    /// the person record — no second store.
+    #[serde(default)]
+    pub derived_digest: Option<DigestRecord>,
     #[serde(default)]
     pub ext: Ext,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub struct DigestRecord {
+    pub digest: [u8; 32],
+    pub at: Timestamp,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -148,7 +159,7 @@ pub struct Location {
 
 /// Detector kinds (orrery/SPEC-02). Detectors themselves land in Phase 3;
 /// the record type is here because commands can waive them.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum ViolationKind {
     TimeConflict,
     LocationExclusivity,
@@ -261,7 +272,7 @@ pub enum Role {
     Coordinator,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MemberOf {
     pub person: PersonId,
     pub group: GroupId,
@@ -270,7 +281,7 @@ pub struct MemberOf {
     pub role: Role,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct SubgroupOf {
     pub child: GroupId,
     pub parent: GroupId,
