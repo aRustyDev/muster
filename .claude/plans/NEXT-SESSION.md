@@ -1,8 +1,8 @@
-# Next-session kickoff — Phase 6 Prototype
+# Next-session kickoff — plan review, then Phase 6 Prototype
 
-*Written 2026-08-02 at the Phase-6 PoC close. Paste the prompt below into a
-fresh session in this repo. Delete or rewrite this file when the slice
-merges.*
+*Written 2026-08-02 at the Phase-6 PoC close; review step made mandatory by
+owner direction the same day. Paste the prompt below into a fresh session
+in this repo. Delete or rewrite this file when the slice merges.*
 
 ---
 
@@ -20,10 +20,39 @@ Workspace state: 66 tests green on `main`; run
 `cargo nextest run --workspace` before you start and stop if that is not
 what you see.
 
-**Optional step 0 (owner to confirm): adversarial review.** If directed,
-run the adversarial pass over remaining plans/ROADMAP first (scope sketch
-in the phase-6 PoC session close-out) and fold findings into this slice's
-pre-commitment before writing it.
+**Step 0 — MANDATORY, before any Prototype work: adversarial review of
+the remaining plans and ROADMAP** (owner-directed 2026-08-02). Run it in
+the spirit of `.claude/agents/adversarial-reviewer.md` (arithmetic
+integrity, cross-reference resolution, claim drift, consumer simulation),
+scoped to *forward-looking* material: the unbuilt ROADMAP stages
+(Muster Prototype→RC, SDK Beta/RC, Orrery Alpha→RC), every phase doc's
+Carry-forward table, the specs the future work builds on, and
+ADR-0015/0021's Phase-7 plan. Hunt for completeness/robustness gaps, not
+style. Known suspects to verify or refute — do not stop at them:
+
+* **The salsa mirror assumes a single writer through one `Engine`** — a
+  second writer process on a real datastore (Stage C!) silently breaks
+  invalidation. Nobody has written this down as a Phase-7 requirement.
+* Blast-radius preview (Muster Alpha) needs a **non-persisting** digest
+  dry-run; the engine only has the persisting `refresh_digests`.
+* `expired_membership_effect` has no producer (no persisted derived
+  cache exists); who builds it, and when?
+* Engine analytics (engagement/capacity/divergence) — ROADMAP'd for
+  Orrery Alpha, needed by Muster Beta, owned by **no phase document**.
+* `Warn` policy semantics undefined; SPEC-03 interactive budgets never
+  measured (`select()` sweeps the whole window); RC items
+  (backup/restore, deterministic rebuild, auth/tenancy) have no owning
+  phase.
+
+Deliverables: a findings document at
+`.claude/plans/orrery/artifacts/plan-review-YYYY-MM-DD.md` (tiered
+critical/moderate/low, each with the doc+line it stems from), a
+consolidated cross-phase carry-forward ledger, and — where a finding
+demands new work — phase-doc/ROADMAP amendments as visible, dated edits.
+Zero findings in a category is a reportable result, not a skipped one.
+**Fold the findings into the Prototype pre-commitment below before
+writing it**; if a critical finding reshapes the slice, say so and
+reshape it.
 
 **The slice: Muster Prototype** (ROADMAP gate: "browse, select, priority,
 my-schedule with provenance — member flow complete").
