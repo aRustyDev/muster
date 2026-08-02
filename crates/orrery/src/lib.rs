@@ -26,6 +26,7 @@ pub mod interval;
 pub mod model;
 pub mod repo;
 pub mod tier;
+pub mod travel;
 
 pub use command::{Command, CommandReceipt};
 pub use engine::{Assignment, Engine, FeasibilityOracle};

@@ -26,9 +26,9 @@ use crate::command::{Command, CommandReceipt};
 use crate::error::{OrreryError, Result};
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    AttendanceSource, Attends, EntityRef, Event, EventId, Expects, Group, GroupId, Held, Location,
-    LocationId, MemberOf, Mode, Person, PersonId, Posture, SubgroupOf, TravelCost, Traverse,
-    Violation, ViolationId, Within,
+    AttendanceSource, Attends, ClosureEntry, EntityRef, Event, EventId, Expects, Group, GroupId,
+    Held, Location, LocationId, MemberOf, Mode, Person, PersonId, Posture, SubgroupOf, TravelCost,
+    Traverse, Violation, ViolationId, Within,
 };
 use crate::repo::{Repository, MAX_GROUP_DEPTH};
 use crate::tier;
@@ -50,6 +50,7 @@ struct State {
     expects: Vec<Expects>,
     traverse: Vec<Traverse>,
     within: Vec<Within>,
+    closure: Vec<ClosureEntry>,
     violations: HashMap<ViolationId, Violation>,
 }
 
@@ -130,6 +131,17 @@ impl Repository for MemoryRepo {
             .attends
             .iter()
             .filter(|a| a.event == id)
+            .cloned()
+            .collect())
+    }
+
+    fn held_for_event(&self, id: EventId) -> Result<Vec<Held>> {
+        let _s = tracing::info_span!("repo.held_for_event", backend = "memory").entered();
+        Ok(self
+            .read()?
+            .held
+            .iter()
+            .filter(|h| h.event == id)
             .cloned()
             .collect())
     }
@@ -235,8 +247,19 @@ impl Repository for MemoryRepo {
 
     fn travel(&self, from: LocationId, to: LocationId, mode: &Mode) -> Result<Option<TravelCost>> {
         let _s = tracing::info_span!("repo.travel", backend = "memory").entered();
-        Ok(self
-            .read()?
+        let state = self.read()?;
+        if let Some(e) = state
+            .closure
+            .iter()
+            .filter(|e| e.from == from && e.to == to && &e.mode == mode)
+            .min_by_key(|e| e.duration_s)
+        {
+            return Ok(Some(TravelCost {
+                duration_s: e.duration_s,
+                provenance: e.provenance,
+            }));
+        }
+        Ok(state
             .traverse
             .iter()
             .filter(|t| t.from == from && t.to == to && &t.mode == mode)
@@ -245,6 +268,37 @@ impl Repository for MemoryRepo {
                 duration_s: t.duration_typical_s,
                 provenance: t.provenance,
             }))
+    }
+
+    fn travel_best(&self, from: LocationId, to: LocationId) -> Result<Option<TravelCost>> {
+        let _s = tracing::info_span!("repo.travel_best", backend = "memory").entered();
+        let state = self.read()?;
+        let closure_best = state
+            .closure
+            .iter()
+            .filter(|e| e.from == from && e.to == to)
+            .min_by_key(|e| e.duration_s)
+            .map(|e| TravelCost {
+                duration_s: e.duration_s,
+                provenance: e.provenance,
+            });
+        if closure_best.is_some() {
+            return Ok(closure_best);
+        }
+        Ok(state
+            .traverse
+            .iter()
+            .filter(|t| t.from == from && t.to == to)
+            .min_by_key(|t| t.duration_typical_s)
+            .map(|t| TravelCost {
+                duration_s: t.duration_typical_s,
+                provenance: t.provenance,
+            }))
+    }
+
+    fn traverse_all(&self) -> Result<Vec<Traverse>> {
+        let _s = tracing::info_span!("repo.traverse_all", backend = "memory").entered();
+        Ok(self.read()?.traverse.clone())
     }
 
     fn apply(&self, cmd: Command) -> Result<CommandReceipt> {
@@ -449,6 +503,9 @@ impl Repository for MemoryRepo {
                     .get_mut(&person)
                     .ok_or(OrreryError::NotFound(EntityRef::Person(person)))?;
                 p.derived_digest = Some(crate::model::DigestRecord { digest, at });
+            }
+            Command::ReplaceClosure { entries } => {
+                state.closure = entries;
             }
         }
         Ok(CommandReceipt {

@@ -9,12 +9,16 @@ use crate::command::{Command, CommandReceipt};
 use crate::detect::{self, location_exclusivity, time_conflict, Policy, PolicyMap, ViolationDraft};
 use crate::error::{OrreryError, Result};
 use crate::interval::{Interval, Timestamp};
+use crate::model::LocationId;
 use crate::model::{
     AttendanceSource, Attends, EntityRef, Held, PersonId, Severity, Violation, ViolationId,
     ViolationKind,
 };
 use crate::repo::Repository;
+use crate::travel::{self, ClosureReport, ClosureScope};
 use crate::{derive, incremental};
+
+use crate::detect::impossible_travel::{self, Placed};
 
 pub struct Engine<R: Repository> {
     repo: R,
@@ -131,6 +135,69 @@ impl<R: Repository> Engine<R> {
         Ok(())
     }
 
+    /// Recompute the Layer-2 closure from Layer-1 (ADR-0006) and replace it
+    /// atomically through the command layer. `at` stamps `computed_at` —
+    /// the engine reads no clock.
+    pub fn refresh_closure(&mut self, scope: ClosureScope, at: Timestamp) -> Result<ClosureReport> {
+        let traverse = self.repo.traverse_all()?;
+        let within = self.repo.containment()?;
+        let all = Interval::new(Timestamp(i64::MIN), Timestamp(i64::MAX))
+            .expect("MIN < MAX is a const invariant");
+        let targets: Vec<LocationId> = match scope {
+            ClosureScope::AllLocations => self.repo.locations()?,
+            ClosureScope::EventBearing => {
+                let mut out = Vec::new();
+                for lid in self.repo.locations()? {
+                    if !self.repo.held_for(lid, all)?.is_empty() {
+                        out.push(lid);
+                    }
+                }
+                out
+            }
+        };
+        let entries = travel::compute_closure(&traverse, &within, &targets, at);
+        let report = ClosureReport {
+            sources: targets.len(),
+            pairs: entries.len(),
+        };
+        let _span = tracing::info_span!(
+            "travel.closure_refresh",
+            scope = ?scope,
+            pairs = report.pairs,
+            sources = report.sources
+        )
+        .entered();
+        self.repo.apply(Command::ReplaceClosure { entries })?;
+        Ok(report)
+    }
+
+    /// Join a person's attendance (plus optional overlay edges) to placed
+    /// events: window = the attends edge's own window; location = the
+    /// event's primary hold (first non-overflow, ties to the smaller
+    /// location id); unheld events are skipped (orphan_event's business).
+    fn placed_for(
+        &self,
+        person: PersonId,
+        window: Interval,
+        overlay: &[Attends],
+    ) -> Result<Vec<Placed>> {
+        let mut attends = self.repo.attends_for(person, window)?;
+        attends.extend(overlay.iter().filter(|a| a.person == person).cloned());
+        let mut out = Vec::new();
+        for a in attends {
+            let mut holds = self.repo.held_for_event(a.event)?;
+            holds.sort_by_key(|h| (h.overflow_for.is_some(), h.location));
+            if let Some(h) = holds.first() {
+                out.push(Placed {
+                    event: a.event,
+                    location: h.location,
+                    window: a.during,
+                });
+            }
+        }
+        Ok(out)
+    }
+
     /// Incremental digest for one person at `at` (salsa-memoized).
     pub fn digest(&mut self, person: PersonId, at: Timestamp) -> [u8; 32] {
         *incremental::digest(&self.db, self.world, person, at.micros())
@@ -173,6 +240,11 @@ impl<R: Repository> Engine<R> {
         for pid in self.repo.persons()? {
             let attends = self.repo.attends_for(pid, window)?;
             drafts.extend(time_conflict::detect(pid, &attends));
+            let placed = self.placed_for(pid, window, &[])?;
+            let repo = &self.repo;
+            drafts.extend(impossible_travel::detect(pid, &placed, &|f, t| {
+                repo.travel_best(f, t).ok().flatten()
+            }));
         }
         let containment = self.repo.containment()?;
         let mut all_holds = Vec::new();
@@ -216,6 +288,7 @@ impl<R: Repository> Engine<R> {
             ViolationKind::TimeConflict,
             ViolationKind::LocationExclusivity,
             ViolationKind::ContainmentExclusivity,
+            ViolationKind::ImpossibleTravel,
             ViolationKind::OrphanEvent,
             ViolationKind::CapacityExceeded,
         ];
@@ -306,6 +379,12 @@ impl<R: Repository> FeasibilityOracle for Engine<R> {
             let mut attends = self.repo.attends_for(pid, a.window).unwrap_or_default();
             attends.extend(a.attends.iter().filter(|x| x.person == pid).cloned());
             drafts.extend(time_conflict::detect(pid, &attends));
+            if let Ok(placed) = self.placed_for(pid, a.window, &a.attends) {
+                let repo = &self.repo;
+                drafts.extend(impossible_travel::detect(pid, &placed, &|f, t| {
+                    repo.travel_best(f, t).ok().flatten()
+                }));
+            }
         }
 
         // Locations touched by the proposal.

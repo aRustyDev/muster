@@ -347,6 +347,18 @@ pub struct TravelCost {
     pub provenance: TravelProvenance,
 }
 
+/// One Layer-2 cache row (ADR-0006): a precomputed answer between two
+/// event-bearing locations for one mode. Batch-recomputed, never edited.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ClosureEntry {
+    pub from: LocationId,
+    pub to: LocationId,
+    pub mode: Mode,
+    pub duration_s: i64,
+    pub provenance: TravelProvenance,
+    pub computed_at: Timestamp,
+}
+
 /// Containment edge, tier-ascending only (ADR-0009). Tier legality is
 /// checked at the command layer (relational-style enforcement: one module,
 /// exhaustive tests — Phase 3).

@@ -30,7 +30,7 @@ Three hypotheses were refuted during that work. Expect more.
 | **Datastore** | **OPEN — ADR-0015**; funnel: Stage A complete (phases/01a), Stage B complete (phases/01b — no eliminations; all three to Stage C; qualitative findings against grafeo) |
 | Rust graph landscape | surveyed — RESEARCH-0005 Stage A findings + 20 scorecards |
 | Repository trait shape | sync — ADR-0023 |
-| Implementation | Phases 2, 1b, 3 complete — Orrery Prototype reached; Phase 4 (travel) next |
+| Implementation | Phases 2, 1b, 3, 4 complete — Orrery Prototype + travel; Phase 5 (SDK) next |
 
 ## Phases
 

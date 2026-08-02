@@ -13,8 +13,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    Actor, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person, PersonId,
-    Role, Traverse, Violation, ViolationId,
+    Actor, ClosureEntry, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person,
+    PersonId, Role, Traverse, Violation, ViolationId,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -98,6 +98,11 @@ pub enum Command {
         digest: [u8; 32],
         at: Timestamp,
     },
+    /// Atomically replace the Layer-2 travel closure (ADR-0006:
+    /// batch-recomputed, read-optimised point lookups).
+    ReplaceClosure {
+        entries: Vec<ClosureEntry>,
+    },
 }
 
 impl Command {
@@ -121,6 +126,7 @@ impl Command {
             Command::RecordViolation(_) => "record_violation",
             Command::ResolveViolation { .. } => "resolve_violation",
             Command::SetDerivedDigest { .. } => "set_derived_digest",
+            Command::ReplaceClosure { .. } => "replace_closure",
         }
     }
 }
