@@ -3,7 +3,7 @@
 | Phase | Scope for muster | Exit condition | Status |
 |---|---|---|---|
 | 02 | compiling stub binary in the workspace | workspace builds | complete |
-| 06 | application surfaces in dependency order: member self-selection → coordinator groups → violation inbox → analytics → room assignment | phases/06-app.md | slice 1 (PoC) complete — conflict visible end to end; Prototype next |
+| 06 | application surfaces in dependency order: member self-selection → coordinator groups → violation inbox → analytics → room assignment | phases/06-app.md | slices 1–2 complete — **Prototype gate met** (member flow complete, service + HTTP); Alpha next, blocked by Phase 6a preview primitive |
 | MVP | auth, tenancy, admin, location management (incl. portal-cost import, 04-travel carry-forward) | phase pre-commitment required before entry | not planned *(row added 2026-08-02, plan review MO-5 — these stages previously had no owner anywhere)* |
 | RC | accessibility (level TBD at entry), ops docs, backup/restore, Parquet/CSV egress with anchors excluded | phase pre-commitment required before entry | not planned *(added 2026-08-02, same)* |
 

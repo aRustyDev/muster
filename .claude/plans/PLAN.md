@@ -30,7 +30,7 @@ Three hypotheses were refuted during that work. Expect more.
 | **Datastore** | **OPEN — ADR-0015**; funnel: Stage A complete (phases/01a), Stage B complete (phases/01b — no eliminations; all three to Stage C; qualitative findings against grafeo) |
 | Rust graph landscape | surveyed — RESEARCH-0005 Stage A findings + 20 scorecards |
 | Repository trait shape | sync — ADR-0023 |
-| Implementation | Phases 2, 1b, 3, 4, 5 complete; Phase 6 PoC met (every product at PoC+); Phase 6 Prototype next |
+| Implementation | Phases 2, 1b, 3, 4, 5 complete; Phase 6 slices 1–2 done — **Muster Prototype met** (member flow, service + HTTP; ADR-0025 crates landed); next: Phase 6a engine surfaces (preview dry-run blocks Muster Alpha) |
 
 ## Phases
 

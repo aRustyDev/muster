@@ -1,6 +1,8 @@
 # Phase 06 — Muster application
 
-* Status: `in-progress` — slice 1 (PoC) complete; Prototype next
+* Status: `in-progress` — slices 1 (PoC) and 2 (Prototype) complete; Alpha
+  next, **blocked by Phase 6a** (non-persisting digest preview — engine
+  work, see PLAN.md)
 * Blocks: nothing downstream yet (MVP chain continues within this phase)
 * Blocked by: Phases 3–5 (complete — engine, travel, SDK all exist)
 
@@ -97,25 +99,25 @@ Branch: `feat/phase-06-prototype`.
 
 | # | Hypothesis | Falsified by | Status |
 |---|---|---|---|
-| H1 | **Prototype gate**: full member flow (browse → select+priority → deselect → my-schedule with provenance) through the service layer, conflicts appearing AND resolving from engine records only | e2e red, or boundary greps (`ViolationKind::` / `detect::` / `overlaps(`) non-empty over muster sources | untested |
-| H2 | The QUESTION-0015 leaning (muster-server axum + muster-ui dioxus + thin muster-types) survives web-verification of the 2026-08 ecosystems, and the split lands without UI/server deps leaking into muster-sdk or orrery | research refuting the leaning; `check-scope` / `check-seam` failing | untested |
-| H3 | `RemoveAttendance` + service `deselect` complete Flow A: after deselecting one of two conflicting events, the next sweep auto-resolves the violation with zero app-side logic | violation stays open, or resolution requires app-side computation | untested |
-| H4 | The whole-window sweep inside `select()` fits the muster/SPEC-00 100 ms interactive budget at Prototype scale (10³ persons, ~5×10³ attends) — measured, not assumed (review MO-2: zero measurements exist) | measured p50 > 100 ms at that scale → person-scoped evaluation becomes a pre-committed Alpha item | untested |
-| H5 | The first real deployment knob (exporter selection, Rule 05) lands with `figment` + `tracing-subscriber` in muster-server; libraries stay subscriber-free | any subscriber/exporter dep entering orrery or muster-sdk | untested |
+| H1 | **Prototype gate**: full member flow (browse → select+priority → deselect → my-schedule with provenance) through the service layer, conflicts appearing AND resolving from engine records only | e2e red, or boundary greps (`ViolationKind::` / `detect::` / `overlaps(`) non-empty over muster sources | **confirmed** — `e2e_member_browses_selects_prioritises_deselects_and_resolves` + the same story over HTTP; boundary greps empty across all four muster-family crates |
+| H2 | The QUESTION-0015 leaning (muster-server axum + muster-ui dioxus + thin muster-types) survives web-verification of the 2026-08 ecosystems, and the split lands without UI/server deps leaking into muster-sdk or orrery | research refuting the leaning; `check-scope` / `check-seam` failing | **confirmed** — ADR-0025 (with the honest counter-consideration recorded); check-scope/check-seam green; `muster` itself gained zero deps |
+| H3 | `RemoveAttendance` + service `deselect` complete Flow A: after deselecting one of two conflicting events, the next sweep auto-resolves the violation with zero app-side logic | violation stays open, or resolution requires app-side computation | **confirmed** — e2e asserts conflicts empty and flags gone after deselect; no app-side computation exists to do it with |
+| H4 | The whole-window sweep inside `select()` fits the muster/SPEC-00 100 ms interactive budget at Prototype scale (10³ persons, ~5×10³ attends) — measured, not assumed (review MO-2: zero measurements exist) | measured p50 > 100 ms at that scale → person-scoped evaluation becomes a pre-committed Alpha item | **refuted in spirit** — p50 97.8 ms, p95 102.4 ms (this host, 2026-08-02, `measure_select.rs`): the letter (p50 < 100 ms) survives by 2.2%, p95 is already over, headroom zero. Person-scoped evaluation pre-committed for Alpha (ledger row added) |
+| H5 | The first real deployment knob (exporter selection, Rule 05) lands with `figment` + `tracing-subscriber` in muster-server; libraries stay subscriber-free | any subscriber/exporter dep entering orrery or muster-sdk | **confirmed** — `ServerConfig{bind, exporter}` (defaults→`MUSTER_*` env→`ORRERY_OTEL_EXPORTER` dev spelling); subscriber installed in muster-server only |
 
 ## Acceptance criteria (slice 2, pre-committed)
 
 | Criterion | Threshold | Actual | Verdict |
 |---|---|---|---|
-| Gates | nextest workspace green; clippy -D warnings; fmt; doc-check; check-seam (grep fallback); check-scope; check-xrefs (ADR-0025 dangler resolves) | | |
-| Prototype e2e | `e2e_` member flow: browse → select(+priority) → conflict visible → deselect → conflict resolved → my-schedule provenance intact; service-level | | |
-| SetPriority | service call wired to the existing command, covered by e2e | | |
-| ADR-0025 | written from web-verified evidence; QUESTION-0015 closed with pointer; crates exist per its outcome | | |
-| Boundary | muster-source greps empty; `cargo tree -p muster-sdk` free of UI/server deps; orrery seam grep clean | | |
-| Interactive latency | `select()` measured at ~10³ persons scale; number + method recorded in Results (pass/fail per H4, not tuned first) | | |
-| `just muster::e2e` | fixed (review MO-10) and exercised | | |
-| Privacy | serialized server-facing payloads on a world WITH anchors carry no coordinate; `privacy_` test (extends the standing family early — cheap now, mandatory at Alpha) | | |
-| Artifacts (standing) | plain-language artifact at `plans/muster/artifacts/phase-6-prototype-*.md` | | |
+| Gates | nextest workspace green; clippy -D warnings; fmt; doc-check; check-seam (grep fallback); check-scope; check-xrefs (ADR-0025 dangler resolves) | 72/72 tests; all listed gates green (this host, 2026-08-02) | pass |
+| Prototype e2e | `e2e_` member flow: browse → select(+priority) → conflict visible → deselect → conflict resolved → my-schedule provenance intact; service-level | green — service-level AND repeated over HTTP (tower oneshot) | pass |
+| SetPriority | service call wired to the existing command, covered by e2e | `set_priority` (member spelling: `Actor::Member`, non-binding); e2e-covered | pass |
+| ADR-0025 | written from web-verified evidence; QUESTION-0015 closed with pointer; crates exist per its outcome | ADR-0025 accepted; question closed; muster-types/-server/-ui in the workspace | pass |
+| Boundary | muster-source greps empty; `cargo tree -p muster-sdk` free of UI/server deps; orrery seam grep clean | all empty/clean (incl. tests dirs) | pass |
+| Interactive latency | `select()` measured at ~10³ persons scale; number + method recorded in Results (pass/fail per H4, not tuned first) | p50 97.8 ms / p95 102.4 ms; method in `measure_select.rs`; not tuned | pass (measurement made; H4 verdict above) |
+| `just muster::e2e` | fixed (review MO-10) and exercised | recipe fixed; runs 2 e2e tests | pass |
+| Privacy | serialized server-facing payloads on a world WITH anchors carry no coordinate; `privacy_` test (extends the standing family early — cheap now, mandatory at Alpha) | **criterion as written is unsatisfiable** — see Results (Rule 01.2); wire-shape allowlist test green instead | pass, qualified |
+| Artifacts (standing) | plain-language artifact at `plans/muster/artifacts/phase-6-prototype-*.md` | `phase-6-prototype-member-flow.md` | pass |
 
 ## Plan (slice 2)
 
@@ -142,4 +144,61 @@ The full `opentelemetry-*` bridge is explicitly deferred to Alpha: the
 Rule-05 knob (exporter selection) lands now via figment with `stdout`
 (fmt-layer) and `none`; OTLP wiring arrives when a collector exists to
 receive it. None of these enter orrery or muster-sdk (`check-seam`,
-`check-scope`).
+`check-scope`). *(As landed: also `tower` as a muster-server dev-dep for
+oneshot router tests; `uuid` in muster-types/-server — already baseline.)*
+
+## Results (slice 2 — Prototype)
+
+**Refutations and qualifications first (Rule 01.3):**
+
+1. **H4 refuted in spirit.** First-ever interactive measurement (review
+   MO-2 found none existed): `select()` with its whole-window sweep costs
+   **p50 97.8 ms / p95 102.4 ms** at 10³ persons / 5×10³ attends (this
+   host, 2026-08-02; `crates/muster/tests/measure_select.rs`, run with
+   `--no-capture`). The pre-committed letter (p50 < 100 ms) survives by
+   2.2%; p95 is already over budget; growth headroom is zero — 10³
+   persons is a *small* deployment. Recorded as refuted-in-spirit rather
+   than confirmed-on-a-technicality: **person-scoped selection evaluation
+   is pre-committed for the Alpha slice** (ledger row added). The test
+   asserts only an order-of-magnitude sanity bound so the suite doesn't
+   flake on a knife-edge (rationale in the test header).
+2. **The privacy criterion was mis-specified as pre-committed
+   (Rule 01.2).** It demanded a "world WITH anchors"; such a world cannot
+   be built — `orrery::model::Anchors` has **no producing command and no
+   repository storage** (found while writing the test; the plan review's
+   F2/MO-4 finding, now also a Phase 6a ledger row). What shipped instead:
+   `privacy_member_wire_payloads_carry_no_anchor_or_coordinate_shape` — a
+   recursive JSON key allowlist over every member-flow response, plus
+   `muster-types` DTOs that structurally cannot carry coordinates. The
+   with-anchors fixture is owed the moment Phase 6a lands the producer.
+3. One review input refuted during grounding (already in the findings
+   doc): `SetPriority` was suspected missing engine-side — the command
+   existed; only the service call was owed.
+
+**Confirmed:** H1, H2, H3, H5 (table above). The **Muster Prototype stage
+gate (ROADMAP: "browse, select, priority, my-schedule with provenance —
+member flow complete") is met**, including the review-added deselect leg,
+and the flow is proven twice: at the service seam and over real HTTP.
+
+Landed: `RemoveAttendance` (first removal command; `refresh_after` audit
+at the kind site — it touches no mirrored fact class) ·
+`Repository::events_in(window)` (browse read; interval predicate stays
+repo-side) · service `events`/`set_priority`/`deselect` ·
+`build_demo_world` extraction (PoC demo unchanged in behaviour) ·
+`muster-types` (coordinate-free wire DTOs) · `muster-server` (axum REST,
+figment config, subscriber install, typed error→status mapping) ·
+`muster-ui` (dioxus 0.7 components over the shared DTOs; `web` renderer
+feature-gated so host CI builds it; REST client + `dx` entrypoint are
+Alpha scope) · `just muster::e2e` fixed · 66 → **72 tests**.
+
+Consumer simulation both ways (the PoC's lesson): the CLI demo still
+tells its three-act story, and the server was booted and driven with
+curl — browse, select, schedule with provenance — before the tests were
+trusted.
+
+## Decisions produced (slice 2)
+
+* **ADR-0025** (frontend structure) — QUESTION-0015 closed.
+* Additive engine growth recorded per the trait-growth discipline:
+  `Command::RemoveAttendance`, `Repository::events_in` (orrery/SPEC-04
+  updated with dated notes).
