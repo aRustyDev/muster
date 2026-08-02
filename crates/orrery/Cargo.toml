@@ -1,0 +1,21 @@
+[package]
+name = "orrery"
+description = "Spatiotemporal feasibility engine: entities, validity windows, interval algebra, violation detection"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["repo-memory"]
+repo-memory = []
+# repo-sqlite / repo-<graph> arrive with their implementations (Phases 1b/7).
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+uuid.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

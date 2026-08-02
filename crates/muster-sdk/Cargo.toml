@@ -1,0 +1,10 @@
+[package]
+name = "muster-sdk"
+description = "Search and orchestration over Orrery's feasibility contract"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+orrery.workspace = true

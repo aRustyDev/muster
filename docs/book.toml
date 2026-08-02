@@ -1,0 +1,13 @@
+[book]
+title = "Orrery / Muster"
+description = "Spatiotemporal feasibility engine and its first application — architecture and decision records"
+authors = ["Orrery project"]
+language = "en"
+src = "src"
+
+[build]
+create-missing = false
+
+[output.html]
+default-theme = "rust"
+git-repository-url = "https://github.com/aRustyDev/muster"

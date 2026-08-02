@@ -1,0 +1,11 @@
+# plans product navigation helpers
+default:
+    @just --list
+
+# phase status summary
+phases:
+    @grep -H '^\* Status:' phases/*.md 2>/dev/null || echo "no phase docs yet"
+
+# question status summary
+questions:
+    @grep -H '^\* Status:' questions/*.md 2>/dev/null || echo "no questions here"
