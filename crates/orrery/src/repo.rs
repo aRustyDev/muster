@@ -17,8 +17,8 @@ use crate::command::{Command, CommandReceipt};
 use crate::error::Result;
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    Attends, Event, EventId, Expects, GroupId, Held, Location, LocationId, MemberOf, Mode, Person,
-    PersonId, SubgroupOf, TravelCost, Traverse, Violation, Within,
+    Attends, Event, EventId, Expects, Group, GroupId, Held, Location, LocationId, MemberOf, Mode,
+    Person, PersonId, SubgroupOf, TravelCost, Traverse, Violation, Within,
 };
 
 /// Bound on `group_ancestors` traversal depth (orrery/SPEC-02: depth 5;
@@ -29,6 +29,8 @@ pub trait Repository: Send + Sync {
     fn person(&self, id: PersonId) -> Result<Option<Person>>;
 
     fn event(&self, id: EventId) -> Result<Option<Event>>;
+
+    fn group(&self, id: GroupId) -> Result<Option<Group>>;
 
     fn location(&self, id: LocationId) -> Result<Option<Location>>;
 
