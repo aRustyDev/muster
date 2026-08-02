@@ -317,6 +317,9 @@ pub struct Traverse {
     pub distance_m: Option<f64>,
     pub provenance: TravelProvenance,
     pub computed_at: Timestamp,
+    /// ADR-0009: the sibling rule is a strong default, not an invariant —
+    /// a skybridge edge sets this marker explicitly.
+    pub sibling_override: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

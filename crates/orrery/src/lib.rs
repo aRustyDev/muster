@@ -17,10 +17,13 @@
 //! 5. All mutations through [`command::Command`].
 
 pub mod command;
+pub mod derive;
+pub mod detect;
 pub mod error;
 pub mod interval;
 pub mod model;
 pub mod repo;
+pub mod tier;
 
 pub use command::{Command, CommandReceipt};
 pub use error::{OrreryError, Result};
