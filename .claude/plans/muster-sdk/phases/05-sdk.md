@@ -1,6 +1,6 @@
 # Phase 05 — Muster-SDK: greedy, objectives, suggestion
 
-* Status: `in-progress` — slice 1 complete, slice 2 open
+* Status: `complete`
 * Blocks: Phase 6 (Muster's room-assignment surface consumes `suggest`)
 * Blocked by: orrery Phases 3–4 (complete — oracle, scoring, travel exist)
 
@@ -85,8 +85,76 @@ the handoff's deliberate gap.
 
 | Item | Resolves in |
 |---|---|
-| **Slice 2**: local search (relocate/swap/shift, anytime, `monotone_` tests), `StabilityFromReference` + `ExpectedAttendeeTravel` terms, batch orchestration (closure refresh → digest recompute → sweep → change set), `rand` with caller seed | Phase 5 slice 2 (own pre-committed criteria) |
+| **Slice 2**: local search (relocate/swap/shift, anytime, `monotone_` tests), `StabilityFromReference` + `ExpectedAttendeeTravel` terms, batch orchestration (closure refresh → digest recompute → sweep → change set), `rand` with caller seed | Phase 5 slice 2 (below) |
 | Most-constrained-first ordering when room-compatibility constraints arrive | SDK Alpha |
 | Severity-weight table shared constant between engine and SDK | slice 2 |
 | Explain-assignment (`explain` module) | SDK MVP |
+| CP-SAT evaluate-or-reject | SDK RC |
+
+---
+
+# Slice 2 — local search, stability, batch orchestration
+
+Pre-committed 2026-08-02, before any slice-2 implementation.
+
+## Hypotheses (slice 2, pre-committed)
+
+| # | Hypothesis | Falsified by | Status |
+|---|---|---|---|
+| H5 | **Monotone / anytime** | any fuzz case above seed total | **confirmed** — `monotone_improve_never_worse_than_seed`, 48 cases across random instances, seeds, and budgets down to 1 eval |
+| H6 | **Heterogeneous-rooms improvement** (SDK Alpha gate) | search failing to beat greedy | **confirmed** — the small-room-committed-early instance; search finds the swap greedy cannot foresee |
+| H7 | **Stability confines churn** | any unaffected placement moving | **confirmed** — stability holds a placement against greedy's own tie-break preference; only the displaced event moves |
+| H8 | **Determinism under fixed seed** | divergence | **confirmed** — identical placements, totals, and eval counts across runs |
+| H9 | Batch = engine primitives composed | any engine change required | **confirmed** — `batch::run` is closure→digests→sweep verbatim; zero engine edits in this slice |
+| H10 | Deps += `rand` only | any other | **confirmed** |
+
+Scope decision (pre-committed): the `Shift(event, Δt)` move from SPEC-01 is
+**deferred** — it requires the free-start-times problem, which nothing
+upstream produces yet; relocate and swap cover the fixed-start domain this
+slice serves. Recorded here rather than silently dropped (Rule 01.2).
+
+## Acceptance criteria (slice 2, pre-committed)
+
+| Criterion | Threshold | Actual | Verdict |
+|---|---|---|---|
+| Gates | all green | 65/65 workspace tests; clippy/fmt/xref/check-scope clean (this host, 2026-08-02) | pass |
+| Monotone | `monotone_` proptest green | `just muster_sdk::test-monotone` — green | pass |
+| Alpha gate | refined < greedy on the constructed instance | `search_improves_on_greedy_for_heterogeneous_rooms` | pass |
+| Stability | churn confined to displaced events | `stability_confines_churn_to_displaced_events` | pass |
+| Determinism | identical outcome under fixed seed | `search_deterministic_under_fixed_seed` | pass |
+| Batch | reports against `Engine<MemoryRepo>`, idempotent second run | `batch_run_reports_closure_changes_and_sweep` | pass |
+| Artifacts (standing) | plain-language explainer | `artifacts/phase-5-polish-and-nightly.md` | pass |
+
+## Results (slice 2)
+
+No hypothesis refuted; the risky contracts (monotone under tiny budgets,
+stability vs greedy's own preferences) were fuzz/adversarially tested
+rather than assumed. The SDK Alpha behaviours exist ahead of schedule
+(improvement on heterogeneous rooms, stability term); **the Beta churn
+gate (< 10% on one room removal at realistic scale) deliberately remains
+open** — the slice-2 stability test is qualitative, and the quantitative
+gate needs Beta-scale instances (Phase 7 measurement discipline applies).
+
+Landed: `search::improve` (relocate/swap, first-improvement, seeded,
+budgeted, anytime), `StabilityFromReference` and `ExpectedAttendeeTravel`
+terms (+ `attendee_flow` precomputation over repo data — priority-weighted,
+per SPEC-01 "not type clustering"; unknown routes cost 0), `batch::run`
+(closure → digests → sweep → `ChangeSet`), `notify::ChangeSet`,
+`suggest_and_refine` with `RefineOptions`. `Shift` move deferred as
+pre-committed.
+
+## Decisions produced (slice 2)
+
+* None requiring ADRs. `rand` entered per baseline with caller-supplied
+  seeds only — no ambient randomness anywhere in the SDK.
+
+## Carry-forward (phase close)
+
+| Item | Resolves in |
+|---|---|
+| Beta churn gate (< 10%, realistic scale) — quantitative measurement | SDK Beta / Phase 7 |
+| `Shift` move + free-start-time problem shape | when a consumer needs it |
+| Simulated-annealing escape from local optima (first-improvement can stall) | SDK Alpha+ if instances demand it |
+| `explain` module (which constraints bind, what a move would cost) | SDK MVP |
+| Severity-weight shared constant (engine ↔ SDK) | next engine API touch |
 | CP-SAT evaluate-or-reject | SDK RC |

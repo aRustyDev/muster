@@ -25,6 +25,7 @@ tracing = "0.1"
 blake3 = "1"
 salsa = "0.28"
 petgraph = "0.8"
+rand = "0.9"
 anyhow = "1"
 
 proptest = "1"

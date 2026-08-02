@@ -6,14 +6,18 @@
 //! throughout (inherits ADR-0023).
 
 pub mod assign;
+pub mod batch;
+pub mod notify;
 pub mod objective;
+pub mod search;
 pub mod suggest;
 
 use orrery::interval::Interval;
 use orrery::model::{EventId, LocationId, Violation};
 
 pub use objective::{Breakdown, Objective, Term};
-pub use suggest::suggest_room_schedule;
+pub use search::{SearchBudget, SearchOutcome};
+pub use suggest::{suggest_and_refine, suggest_room_schedule, RefineOptions};
 
 pub type Result<T> = std::result::Result<T, SdkError>;
 
