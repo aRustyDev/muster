@@ -31,3 +31,42 @@ Not assessed — category D; there is nothing to be a system of record with.
 ## Uncertainty
 
 The supported Cypher subset is undocumented (inferred from parser/planner/tests); the exact `MAX_VARIABLE_LENGTH_HOPS` value. If a future Lance-native *store* with transactions emerges from this org, that is a different candidate.
+
+## Addendum — write-path investigation (owner question, 2026-08-01)
+
+The owner asked whether a Lance *write* path could pair with LanceGraph to
+form an in-process store. Verified against current docs (URLs cited inline):
+
+**Write surfaces exist and are real.** The `lance` crate (v9.0.0, 2026-07-24,
+lance-format org; docs.rs `Dataset`) offers full in-process CRUD —
+`write`/`append`/`delete`-by-predicate, `UpdateBuilder`, `MergeInsertBuilder`,
+explicit commit builders. The `lancedb` crate (v0.33.0, embedded/in-process,
+lancedb org) gives table-level `add`/`update`/`delete`/`merge_insert`.
+Per-dataset ACID via MVCC with optimistic concurrency is in the format spec
+(lance.org/format/table/transaction: "MVCC to provide ACID transaction
+guarantees for concurrent readers and writers").
+
+**Why the pairing still fails as SoR — five findings, decisive first:**
+
+1. The stop-gate failure is unchanged: writes don't touch the query engine,
+   and LanceGraph's variable-length expansion still takes no relationship
+   properties. Q1 would be restructured into app-side chained single hops —
+   the architectural concession ADR-0021 blocks on.
+2. No cross-dataset atomicity, by spec — commits are per-table only; Orrery
+   commands touching several relations would need hand-built ordering +
+   idempotency under Rule 00.2.
+3. Write-shape mismatch: every commit is a new immutable version, no WAL in
+   OSS; docs flag per-row writes as pathological and a documented failure
+   mode exists (lancedb#3086: 5,000 single-row adds → ~800 MB, cleanup
+   wedging writes). Muster's interactive workload is exactly this shape.
+4. Both crates are async-only (tokio) — conflicts with ADR-0023.
+5. Version skew today: lance-graph pins `lance =1.0.0` vs current lance
+   9.0.0 (lancedb pins 8/9) — they cannot share Arrow types in one binary;
+   lance-graph also has no refresh contract (readers pinned at open; reopen
+   per version is the caller's job; CSR rebuild cost undocumented).
+
+**Where Lance does fit:** ADR-0015 already requires ingest/egress via a
+portable format; Lance (or Parquet, which Lance interoperates with) is a
+strong egress-format candidate, and a Lance/LanceGraph analytics sidecar
+could be revisited at Phase 7 without touching the SoR decision. Verdict
+unchanged: eliminated as system of record.
