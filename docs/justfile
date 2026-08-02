@@ -1,0 +1,20 @@
+# docs — mdbook + ADRs
+
+default:
+    @just --list
+
+build:
+    mdbook build
+
+serve:
+    mdbook serve --open
+
+# every ADR/SPEC/QUESTION/RESEARCH reference must resolve (agent 1, pass 2)
+check-links:
+    mdbook test
+    ./scripts/check-xrefs.sh
+
+# next free ADR number
+adr-next:
+    @ls src/adrs | grep -oE '^[0-9]{4}' | sort -n | tail -1 | \
+      awk '{printf "%04d\n", $1+1}'
