@@ -11,10 +11,10 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::interval::Interval;
+use crate::interval::{Interval, Timestamp};
 use crate::model::{
     Actor, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person, PersonId,
-    Role, Traverse, ViolationId,
+    Role, Traverse, Violation, ViolationId,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -84,6 +84,20 @@ pub enum Command {
         by: Actor,
         reason: String,
     },
+    /// Persist a violation record. The ENGINE mints the id and detected_at
+    /// (from the sweep instant — no clock reads); detectors only draft.
+    RecordViolation(Violation),
+    /// Close an open violation whose cause is no longer detected.
+    ResolveViolation {
+        id: ViolationId,
+        at: Timestamp,
+    },
+    /// Persist a person's derivation digest (ADR-0016 B).
+    SetDerivedDigest {
+        person: PersonId,
+        digest: [u8; 32],
+        at: Timestamp,
+    },
 }
 
 impl Command {
@@ -104,6 +118,9 @@ impl Command {
             Command::AddContainment { .. } => "add_containment",
             Command::AddTraversePair(_) => "add_traverse_pair",
             Command::WaiveViolation { .. } => "waive_violation",
+            Command::RecordViolation(_) => "record_violation",
+            Command::ResolveViolation { .. } => "resolve_violation",
+            Command::SetDerivedDigest { .. } => "set_derived_digest",
         }
     }
 }

@@ -23,6 +23,7 @@ serde = { version = "1", features = ["derive"] }
 uuid = { version = "1", features = ["v7", "serde"] }
 tracing = "0.1"
 blake3 = "1"
+salsa = "0.28"
 anyhow = "1"
 
 proptest = "1"

@@ -1,6 +1,6 @@
 # Phase 03 — Engine core: detectors and derivation
 
-* Status: `in-progress`
+* Status: `complete`
 * Blocks: Phase 4 (travel), Phase 5 (SDK needs oracle + scoring)
 * Blocked by: Phase 02 (complete), QUESTION-0014 (closed — ADR-0024)
 
@@ -118,7 +118,101 @@ existence checks on holds/traversals; `sibling_override` marker on
 
 | Item | Resolves in |
 |---|---|
-| **Slice 2**: salsa incrementality, persisted digests, sweep orchestration writing `Violation`s through the command layer (incl. the `Prevent` call site), `score()`, SPEC-01/02/04 updates | Phase 3 slice 2 (own pre-committed criteria) |
-| Sibling rule common-parent refinement (needs containment lookup at traverse write) | slice 2 or Phase 4 |
+| **Slice 2**: salsa incrementality, persisted digests, sweep orchestration writing `Violation`s through the command layer (incl. the `Prevent` call site), `score()`, SPEC-01/02/04 updates | Phase 3 slice 2 (below) |
+| Sibling rule common-parent refinement (needs containment lookup at traverse write) | Phase 4 |
 | Severity defaults need product confirmation | Muster PoC feedback |
 | Q5/SPEC-02 "excluding declared overflow" wording — detector implements the physical reading; harness clause shown dead on generated data | slice 2 spec cleanup |
+
+---
+
+# Slice 2 — incrementality, digests, sweeps, oracle
+
+Pre-committed 2026-08-02, before any slice-2 implementation. Salsa API
+verified against docs.rs (salsa 0.28.1, 2026-07-22): multi-argument tracked
+functions intern their argument tuple; backdating compares results with
+`PartialEq`; `DatabaseImpl` for a plain database.
+
+## Hypotheses (slice 2, pre-committed)
+
+| # | Hypothesis | Falsified by | Status |
+|---|---|---|---|
+| H6 | **Incremental ≡ cold** (SPEC-05): after an arbitrary command sequence, the salsa-backed digest for every person equals the digest computed cold from `derive::expand` over the repository — fuzzed over random sequences | any divergence for any person after any sequence | **confirmed** — `prop_incremental_digest_matches_cold`, 64 cases × 4 persons, sequences of up to 25 mixed membership/subgroup/expectation commands, random evaluation instants. One divergence was designed OUT before testing: the salsa chain is float-free, so the winner-per-event rule had to carry priority as an order-preserving bit pattern to match `expand` exactly — see Results |
+| H7 | **Early cutoff is real** (ADR-0016 C): (a) a write for A does not re-execute B's expansion or digest; (b) an unrelated expectation write re-executes A's derived-ids but not A's digest | execution counters showing the forbidden re-executions | **confirmed, stronger than hypothesised** — salsa 0.28 tracks dependencies per input *field*, so in case (b) even A's `direct_groups`/`reach` never re-ran (they depend only on the memberships/subgroups fields). Asserted with execution counters in two process-isolated test binaries |
+| H8 | **Sweep lifecycle idempotent and complete** | duplicates, missing resolutions, clobbered waivers | **confirmed** — emit → idempotent re-sweep → waive → neither duplicated nor auto-resolved; disappeared-cause resolution sets `resolved_at` |
+| H9 | **`Prevent` = same detector, second call site** | prevented write mutating state, or a second detector implementation | **confirmed** — the gate calls the identical `time_conflict::detect` / `location_exclusivity::detect` functions; rejected write leaves state untouched; `Detect` lands the same write |
+| H10 | Slice 2 adds exactly one dependency: `salsa` | any other new dependency | **confirmed** — salsa 0.28 only |
+
+## Acceptance criteria (slice 2, pre-committed)
+
+| Criterion | Threshold | Actual | Verdict |
+|---|---|---|---|
+| Gates | nextest, clippy `-D warnings`, fmt, seam, xref all green | 50/50 tests; all gates clean (this host, 2026-08-02) | pass |
+| Incremental fuzz | salsa digest == cold digest, all persons, every case | 64 cases green (`tests/prop_incremental.rs`) | pass |
+| Early cutoff | both H7 scenarios via execution counters | `incremental_cutoff_person` + `incremental_cutoff_ids` binaries (process-isolated counters) | pass |
+| Digest persistence | on the person record via command; exact change-set; idempotent | `incremental_refresh_digests_returns_exact_change_set` | pass |
+| Oracle | overlay evaluation + deterministic score | `oracle_scores_overlay_without_writing` (−100 conflicting / 0 clean; read-only verified) | pass |
+| Spec updates | SPEC-04 rewrite, SPEC-01 note, SPEC-02 cleanups — all dated | done 2026-08-02 | pass |
+
+Design decisions fixed in advance:
+
+* **Salsa layering**: one `World` input (memberships, subgroup edges,
+  float-free expectation keys) with per-person tracked extraction feeding
+  reach → derived-ids → digest; early cutoff at the extraction layer is the
+  mechanism that bounds blast radius. Digest chain is float-free by
+  construction (id sets, not priorities — per ADR-0016 B the digest hashes
+  the sorted derived-edge id set).
+* **The engine mirrors base facts into `World` after each successful
+  command**; only the three fact classes the derived chain reads trigger a
+  mirror refresh.
+* **Sweep dedup key** is `(kind, subjects)` against open violations; sweeps
+  resolve only kinds they cover; waived violations are skipped entirely.
+* **`is_feasible` returns freshly-minted `Violation` records** with
+  `detected_at = assignment.at` (caller-supplied instant — the engine still
+  reads no clock).
+
+## Results (slice 2)
+
+Near-refutation first (Rule 01.3): **the float-free salsa chain and
+`derive::expand` would have diverged** on multi-expectation events — the
+chain originally picked winners by group id alone while `expand` picks by
+priority-then-group, and the two produce different `DerivedId`s whenever a
+higher-priority expectation lives on a higher group id. Caught during
+implementation review before the fuzz ran; fixed by carrying
+`default_priority` as an order-preserving bit pattern (`priority_key`) so the
+winner rule is bit-identical without a float entering the memoized chain.
+The H6 fuzz then passed 64/64 — and exists precisely to catch this class.
+
+Second finding: **salsa 0.28's dependency tracking is per input field**, not
+per input struct, so early cutoff is finer than the design assumed — an
+expectation write leaves the membership-derived layers completely untouched
+(zero re-executions), not merely backdated. Blast radius is bounded one
+layer earlier than ADR-0016's minimum requirement.
+
+Landed: `incremental` (World mirror; `direct_groups → reach → derived_ids →
+digest` tracked chain; probe counters — the crate's one piece of global
+state, existing so cutoff is asserted rather than trusted); `Engine`
+(Prevent gate, salsa mirror refresh scoped to the three fact classes the
+chain reads, `refresh_digests` change-sets persisted on the person record,
+sweep with `(kind, subjects)` dedup + disappeared-cause resolution +
+waiver protection); `FeasibilityOracle` with `Assignment` overlay and
+documented severity weights; commands `RecordViolation` / `ResolveViolation`
+/ `SetDerivedDigest`; eight sweep-support repository methods; SPEC-01/02/04
+updated with dated notes. **Orrery Prototype gate (ROADMAP): model,
+interval algebra, all detectors, derived expansion — property tests green
+vs brute-force oracles. Reached.**
+
+## Decisions produced (slice 2)
+
+* No new ADRs; ADR-0016 A–C are now implemented (D, the event log, remains
+  v2 by design). Severity weights for `score` recorded here pending SDK
+  objective composition (ADR-0013 keeps richer objectives out of the engine).
+
+## Carry-forward (slice 2 close)
+
+| Item | Resolves in |
+|---|---|
+| Travel feasibility into `is_feasible` + sweep (`feasible(person, e1, e2)` signature, Layer-2 lookups) | Phase 4 |
+| `expired_membership_effect` needs a persisted derived-edge cache to audit (digests detect *that*, not *what*); producer lands with reconciliation | Phase 5 batch orchestration (SDK) or Phase 4 |
+| Sibling-rule common-parent refinement | Phase 4 |
+| Sweep performance at 10⁵–10⁶ edges vs SPEC-03 budgets (functional now, unmeasured) | Phase 7 benchmarks |
+| `Warn` policy currently behaves as `Detect` (no notification channel exists yet — muster owns delivery) | Phase 6 |

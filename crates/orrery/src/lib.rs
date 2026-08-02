@@ -19,13 +19,16 @@
 pub mod command;
 pub mod derive;
 pub mod detect;
+pub mod engine;
 pub mod error;
+pub mod incremental;
 pub mod interval;
 pub mod model;
 pub mod repo;
 pub mod tier;
 
 pub use command::{Command, CommandReceipt};
+pub use engine::{Assignment, Engine, FeasibilityOracle};
 pub use error::{OrreryError, Result};
 pub use interval::{AllenRelation, Interval, Timestamp};
 pub use repo::Repository;

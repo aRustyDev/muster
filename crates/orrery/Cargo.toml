@@ -19,6 +19,8 @@ tracing.workspace = true
 # ADR-0022 approved baseline; used for derived-edge content addressing
 # (ADR-0016 A). Recorded in phases/03-engine-core.md H4.
 blake3.workspace = true
+# ADR-0022 baseline; incremental derivation (ADR-0016 C). Slice-2 H10.
+salsa.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true
