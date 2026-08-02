@@ -24,6 +24,13 @@ than replacing it (Rule 01.2).
 
 Fill `Actual` and `Verdict` only after measurement.
 
+**Standing criterion — every phase carries this row (added 2026-08-02, by
+owner direction):**
+
+| Criterion | Threshold | Actual | Verdict |
+|---|---|---|---|
+| Artifacts | plain-language artifact(s) at `plans/<product>/artifacts/phase-NN-*.md` explaining what this phase added and why it is valuable, written so a non-domain reader can follow them (visual aids and everyday examples where they help) | | |
+
 ## Plan
 
 Ordered steps. Note which are reversible and which are not.

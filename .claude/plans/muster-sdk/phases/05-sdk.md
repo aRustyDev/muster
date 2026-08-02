@@ -36,6 +36,7 @@ Two slices (working software early, Rule 03):
 | Breakdown | additive + deterministic; severity table consistent | asserted in integration | pass |
 | Specs | SPEC-02/03 written | done, dated at Phase-5 entry | pass |
 | Plans | rows updated | done | pass |
+| Artifacts (standing criterion, added 2026-08-02) | plain-language explainer for non-experts | `artifacts/phase-5-room-suggestions.md` | pass |
 
 Design decisions fixed in advance:
 
