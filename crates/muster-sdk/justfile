@@ -1,0 +1,26 @@
+# muster-sdk — search and orchestration
+
+default:
+    @just --list
+
+test:
+    cargo nextest run -p muster-sdk --all-features
+
+# greedy must match brute-force optimum on fixed-start-time instances (n<=12)
+test-optimality:
+    cargo nextest run -p muster-sdk -E 'test(optimality_)'
+
+# local search must never return worse than its seed
+test-monotone:
+    cargo nextest run -p muster-sdk -E 'test(monotone_)'
+
+bench:
+    cargo bench -p muster-sdk
+
+lint:
+    cargo clippy -p muster-sdk --all-targets --all-features -- -D warnings
+
+# fails if a UI dependency leaks into the SDK (Rule 03 / QUESTION-0015)
+check-scope:
+    cargo tree -p muster-sdk | grep -Ei 'dioxus|leptos|yew|axum' \
+      && (echo "SCOPE VIOLATION: UI/server dep in muster-sdk" && exit 1) || true

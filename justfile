@@ -19,9 +19,10 @@ default:
 
 # verify the toolchain this justfile assumes
 doctor:
-    @command -v cargo-nextest    >/dev/null || echo "missing: cargo-nextest"
-    @command -v cargo-public-api >/dev/null || echo "missing: cargo-public-api"
-    @command -v mdbook           >/dev/null || echo "missing: mdbook"
+    @cargo nextest --version    >/dev/null 2>&1 || echo "missing: cargo-nextest"
+    @cargo public-api --version >/dev/null 2>&1 || echo "missing: cargo-public-api"
+    @command -v rustup >/dev/null 2>&1 || echo "note: no rustup (Homebrew rust) - cargo-public-api cannot build rustdoc JSON; check-seam uses its grep fallback"
+    @command -v mdbook >/dev/null 2>&1 || echo "missing: mdbook"
     @just --version
 
 # cross-reference and count audit of the plans/docs corpus

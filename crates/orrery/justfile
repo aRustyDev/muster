@@ -1,0 +1,44 @@
+# orrery — the engine
+
+default:
+    @just --list
+
+test:
+    cargo nextest run -p orrery --all-features
+
+# detectors must ship with their brute-force oracle (Rule 03 / agent 3)
+test-detectors:
+    cargo nextest run -p orrery --features proptest -E 'test(detect_)'
+
+# derived state must equal a cold recompute after arbitrary mutation sequences
+test-incremental:
+    cargo nextest run -p orrery --features proptest -E 'test(incremental_)'
+
+# anchor coordinates must never cross the coordinator boundary (Rule 00.6)
+test-privacy:
+    cargo nextest run -p orrery -E 'test(privacy_)'
+
+bench:
+    cargo bench -p orrery
+
+# the seven canonical queries at 1e3 / 1e5 / 1e6
+bench-canonical:
+    cargo bench -p orrery --bench canonical
+
+lint:
+    cargo clippy -p orrery --all-targets --all-features -- -D warnings
+
+# fails if a concrete datastore type appears in the public API (Rule 00.1).
+# cargo-public-api needs a rustup nightly for rustdoc JSON; without rustup we
+# fall back to grepping the source public surface (same identifiers).
+check-seam:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PAT='sqlite|ladybug|kuzu|cozo|grafeo|agdb|rusqlite'
+    if command -v rustup >/dev/null 2>&1; then
+      OUT=$(cargo public-api -p orrery --simplified | grep -Ei "$PAT" || true)
+    else
+      OUT=$(grep -rhiE "^\s*pub .*($PAT)" src/ || true)
+    fi
+    if [ -n "$OUT" ]; then echo "SEAM VIOLATION: datastore type in public API"; echo "$OUT"; exit 1; fi
+    echo "seam clean"
