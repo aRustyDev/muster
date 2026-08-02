@@ -1,0 +1,20 @@
+# muster-server — the REST edge (ADR-0025)
+
+default:
+    @just --list
+
+test:
+    cargo nextest run -p muster-server
+
+e2e:
+    cargo nextest run -p muster-server -E 'test(e2e_)'
+
+privacy:
+    cargo nextest run -p muster-server -E 'test(privacy_)'
+
+lint:
+    cargo clippy -p muster-server --all-targets --all-features -- -D warnings
+
+# development: demo world, fmt traces to stdout (Rule 05)
+run-dev:
+    ORRERY_OTEL_EXPORTER=stdout cargo run -p muster-server

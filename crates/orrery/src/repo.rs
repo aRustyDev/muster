@@ -76,6 +76,11 @@ pub trait Repository: Send + Sync {
     fn persons(&self) -> Result<Vec<PersonId>>;
     fn locations(&self) -> Result<Vec<LocationId>>;
     fn events(&self) -> Result<Vec<Event>>;
+    /// Events whose window overlaps `window` — the browse read. Additive
+    /// trait growth (Phase 6 slice 2, recorded per the trait-growth
+    /// discipline): the interval predicate belongs on the repo side of the
+    /// seam, and stores may index it; callers must not re-filter.
+    fn events_in(&self, window: Interval) -> Result<Vec<Event>>;
     fn attends_for_event(&self, id: EventId) -> Result<Vec<Attends>>;
     fn held_for_event(&self, id: EventId) -> Result<Vec<Held>>;
     fn open_violations(&self) -> Result<Vec<Violation>>;

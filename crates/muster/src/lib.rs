@@ -10,5 +10,7 @@
 pub mod demo;
 pub mod service;
 
-pub use demo::{run_demo, DemoReport};
-pub use service::{EntrySource, MusterService, ScheduleEntry, ScheduleView, SelectionOutcome};
+pub use demo::{build_demo_world, run_demo, DemoReport, DemoWorld};
+pub use service::{
+    EntrySource, EventSummary, MusterService, ScheduleEntry, ScheduleView, SelectionOutcome,
+};

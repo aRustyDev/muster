@@ -33,6 +33,16 @@ pub enum Command {
         /// default when the edge is derived (Phase 3).
         priority: Option<f32>,
     },
+    /// Remove a person's explicit attendance edge(s) for an event — the
+    /// member "deselect" (PRD Flow A: resolve a conflict by dropping a
+    /// selection). Derived entries have no edge to remove (ADR-0004);
+    /// authorisation is the service layer's concern, not this command's.
+    /// First removal variant in the enum (Phase 6 slice 2, plan-review
+    /// CR-6); broader retraction lands with the Alpha pre-commitment.
+    RemoveAttendance {
+        person: PersonId,
+        event: EventId,
+    },
     SetPriority {
         person: PersonId,
         event: EventId,
@@ -115,6 +125,10 @@ impl Command {
             Command::UpsertEvent(_) => "upsert_event",
             Command::UpsertLocation(_) => "upsert_location",
             Command::AddAttendance { .. } => "add_attendance",
+            // Touches no mirrored fact class (memberships/subgroups/
+            // expectations), so incremental::refresh_after correctly
+            // ignores it — audited at introduction (plan-review CR-1).
+            Command::RemoveAttendance { .. } => "remove_attendance",
             Command::SetPriority { .. } => "set_priority",
             Command::AddMembership { .. } => "add_membership",
             Command::AddSubgroup { .. } => "add_subgroup",

@@ -6,8 +6,10 @@ default:
 test:
     cargo nextest run -p muster --all-features
 
+# (fixed 2026-08-02, plan-review MO-10: the recipe passed `--features e2e`
+# but no such cargo feature exists — the e2e_ family is selected by name)
 e2e:
-    cargo nextest run -p muster --features e2e -E 'test(e2e_)'
+    cargo nextest run -p muster -E 'test(e2e_)'
 
 run:
     cargo run -p muster

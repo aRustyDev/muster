@@ -1,0 +1,17 @@
+[package]
+name = "muster-ui"
+description = "Muster web UI: dioxus components over muster-types wire DTOs (ADR-0025)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+dioxus.workspace = true
+muster-types.workspace = true
+
+[features]
+# `dx serve --features web` builds the WASM app; the bare library (checked
+# by workspace CI on the host) carries components only.
+default = []
+web = ["dioxus/web"]

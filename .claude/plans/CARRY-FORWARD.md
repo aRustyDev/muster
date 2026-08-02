@@ -12,16 +12,16 @@ to stop (it has happened at least five times — review findings MO-4, CR-3).*
 Columns: origin = doc:line that recorded it · owner = who resolves it now.
 `(review)` = item created by the 2026-08-02 review itself.
 
-## Phase 6 slice 2 — Prototype (this slice)
+## Phase 6 slice 2 — Prototype ✅ closed 2026-08-02 (phases/06-app.md slice-2 Results)
 
 | Item | Origin | Owner status |
 |---|---|---|
-| QUESTION-0015 frontend ADR (ADR-0025) + crates per its outcome | 06-app.md:74 | this slice |
-| Browse/priority surfaces, full member flow, `SetPriority` service call | 06-app.md:74 | this slice |
-| `RemoveAttendance` command + `deselect` service call (Flow A "resolve") — includes teaching `incremental::refresh_after` the new kind | review CR-6 | this slice (reshaped by review) |
-| `select()` interactive latency measured (not optimised unless the number demands it) | 06-app.md:76 vs kickoff — conflict resolved: measure now | this slice |
-| `figment` + tracing-subscriber when the first real config knob exists | 06-app.md:78 | this slice (expected) |
-| Fix `just muster::e2e` (`--features e2e` flag, no such feature) | review MO-10 | this slice |
+| QUESTION-0015 frontend ADR (ADR-0025) + crates per its outcome | 06-app.md:74 | ✅ done |
+| Browse/priority surfaces, full member flow, `SetPriority` service call | 06-app.md:74 | ✅ done |
+| `RemoveAttendance` command + `deselect` service call (Flow A "resolve") — `refresh_after` audited: the kind touches no mirrored fact class | review CR-6 | ✅ done |
+| `select()` interactive latency measured | 06-app.md:76 | ✅ measured — p50 97.8 ms / p95 102.4 ms at 10³ persons; **H4 refuted in spirit → new Alpha row below** |
+| `figment` + tracing-subscriber when the first real config knob exists | 06-app.md:78 | ✅ done (muster-server; OTLP explicitly deferred to Alpha) |
+| Fix `just muster::e2e` (`--features e2e` flag, no such feature) | review MO-10 | ✅ done |
 
 ## Muster Alpha (Phase 6 slice 3) — pre-commitment must cover
 
@@ -34,6 +34,9 @@ Columns: origin = doc:line that recorded it · owner = who resolves it now.
 | Group-scoped violation query (`inbox(filter)`, "touching G") — repo query vs engine surface vs measured app-side join | muster/SPEC-01:29, SPEC-02:19; review MO-11 | **re-homed here** |
 | Retraction commands beyond `RemoveAttendance` (membership/expectation/hold end-or-shorten) | review CR-6 | **new** |
 | Severity defaults product confirmation (expired "Muster PoC feedback") | 03-engine-core.md:123; review MO-4 | **re-homed here** — coordinator flow is where severity is felt |
+| Person-scoped `select()` evaluation: replace the whole-window sweep on the interactive path (measured 2026-08-02 at p50 97.8 ms / p95 102.4 ms @ 10³ persons — budget knife-edge, zero headroom); conflicts must still land as records | 06-app.md slice-2 H4 (refuted in spirit) | **new — pre-committed for Alpha** |
+| OTLP exporter wiring behind the existing `exporter` knob (deferred from slice 2; needs a collector to receive it) | 06-app.md slice-2 dep note | **new** |
+| muster-ui REST client + `dx` web entrypoint + UI content (components/type-sharing landed in slice 2) | ADR-0025; 06-app.md slice-2 | **new** |
 
 ## Muster Beta (Phase 6 slice 4)
 
@@ -53,6 +56,7 @@ slice.*
 | Item | Origin | Notes |
 |---|---|---|
 | Non-persisting digest dry-run (expectation/membership overlay → change-set preview equal to post-commit `refresh_digests`) | review CR-2; muster/SPEC-02:18 | the honesty gate is already spec'd (muster/SPEC-03:17-21) |
+| Anchor producer + anchor→first-event feasibility consult (ADR-0014 core feature; `Anchors` has no command and no storage today, so worlds-with-anchors fixtures are impossible — the slice-2 privacy test records this) | 04-travel.md:107 (expired "Phase 5/6"); review MO-4 | *(row added 2026-08-02 during slice-2 implementation — the review re-homed this item but the initial ledger draft omitted the row)* |
 | Analytics surface: engagement, capacity pressure, divergence, bounded 2-hop co-attendance | review CR-4; orrery/SPEC-02:68-73 | 2-hop has a pre-committed budget (<50 ms p95, orrery/SPEC-03:14) |
 | Define the 10⁵ budget set (or restate Orrery Alpha gate at 10⁶) | review CR-4 | Orrery Alpha is unexitable as written |
 | Attendance-model hook (orrery "○ hook" side): make the capacity-interest threshold an injectable strategy | ROADMAP.md:17; review (engine item 7) | SDK impl side stays SDK-owned |
