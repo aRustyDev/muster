@@ -93,6 +93,11 @@ impl Repository for MemoryRepo {
         Ok(self.read()?.events.get(&id).cloned())
     }
 
+    fn group(&self, id: GroupId) -> Result<Option<Group>> {
+        let _s = tracing::info_span!("repo.group", backend = "memory").entered();
+        Ok(self.read()?.groups.get(&id).cloned())
+    }
+
     fn location(&self, id: LocationId) -> Result<Option<Location>> {
         let _s = tracing::info_span!("repo.location", backend = "memory").entered();
         Ok(self.read()?.locations.get(&id).cloned())

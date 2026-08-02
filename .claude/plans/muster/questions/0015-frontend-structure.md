@@ -47,3 +47,9 @@ noting that extracting the server later is a real cost.
 
 Muster PoC. The frontend is not on the critical path — Orrery and the SDK are —
 and deciding early buys nothing. Revisit at Muster Prototype.
+
+> *Status note (2026-08-02, Phase 6 slice 1): the PoC shipped headless — a
+> service layer plus CLI demo — exactly so this question could stay open.
+> The decision point is now Muster Prototype, where the ADR gets written;
+> the leaning above (option 2, muster-server + muster-ui + thin types
+> crate) stands unchanged by anything the PoC learned.*
