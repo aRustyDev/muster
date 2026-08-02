@@ -354,6 +354,7 @@ mod tests {
             name: name.into(),
             window: w,
             kind: "seminar".into(),
+            timezone: None,
             ext: Default::default(),
         }
     }

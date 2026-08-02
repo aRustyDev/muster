@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
 members = ["crates/orrery", "crates/muster-sdk", "crates/muster"]
+# tools/screening is the Phase-1b throwaway harness: its own workspace, its
+# own datastore dependencies (Rule 06 keeps those out of the product crates).
+exclude = ["tools/screening"]
 
 [workspace.package]
 version = "0.1.0"

@@ -103,8 +103,12 @@ pub struct Group {
 pub struct Event {
     pub id: EventId,
     pub name: String,
+    /// Concrete UTC instants — the engine never sees recurrences (ADR-0024).
     pub window: Interval,
     pub kind: String,
+    /// IANA authoring zone. Display/expansion metadata; the interval algebra
+    /// never reads it (ADR-0024).
+    pub timezone: Option<String>,
     #[serde(default)]
     pub ext: Ext,
 }

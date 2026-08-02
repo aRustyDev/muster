@@ -39,6 +39,12 @@ Generated worlds must deliberately contain:
 * a group hierarchy of depth ≥ 4 with a mid-chain expired `subgroup_of` edge
 * locations hosting no events (intermediate travel nodes)
 * over-capacity events
+* **DST-crossing pairs (ADR-0024, added 2026-08-01):** a spring-forward pair
+  whose wall-clock rendering misstates the true UTC gap (travel feasibility
+  must judge the instants), and a fall-back pair whose wall-clock rendering
+  suggests an overlap that does not exist in UTC (conflict detection must
+  not fire). The original fixture list had none — all three QUESTION-0014
+  failure modes would have shipped undetected.
 
 The expired mid-chain edge is the critical one: it is what distinguishes true
 per-hop temporal filtering from whole-path post-filtering.

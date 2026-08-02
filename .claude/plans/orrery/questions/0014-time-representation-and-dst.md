@@ -2,7 +2,7 @@
 
 # QUESTION 0014 — Time representation, and what DST does to an interval
 
-* Status: **OPEN — has a correctness dimension, not just an ergonomic one**
+* Status: **ANSWERED — ADR-0024** (2026-08-01, closed before Phase 3 as required)
 * Raised: 2026-08-01
 
 ## Question
@@ -13,10 +13,14 @@ across a daylight-saving transition?
 
 ## Answer
 
-**Unresolved.** A leaning is recorded below but no decision has been taken.
-This question has a **correctness dimension, not merely an ergonomic one** — see
-the three failure modes. It must close before the engine core lands (Phase 3),
-because interval representation is load-bearing for every detector.
+**ADR-0024**, which follows the leaning recorded below: `i64` microseconds
+UTC as the sole comparison key (landed in Phase 2's `Timestamp`); authoring
+zone retained as metadata on `Event` (and `Group`); **recurrence expansion
+pushed out of the engine entirely** — Orrery only sees concrete instances,
+which moves failure mode 1 out of scope, while modes 2 and 3 are
+structurally absent under a single comparison representation. DST-crossing
+fixtures added to orrery/SPEC-05. The consequence to dislike (the engine
+cannot detect a mis-expanded recurrence) is recorded in the ADR.
 
 ## Why this is not merely a types question
 

@@ -27,3 +27,4 @@
 - [<!-- Imported from design thread 2026-08-01. Fable: review and improve. -->](adrs/0021-datastore-selection-funnel.md)
 - [<!-- Imported from design thread 2026-08-01. Fable: review and improve. -->](adrs/0022-dependency-baseline.md)
 - [23. The repository trait is synchronous](adrs/0023-sync-repository-trait.md)
+- [24. Time is UTC instants internally; zones are metadata; recurrence is not an engine concern](adrs/0024-time-representation.md)

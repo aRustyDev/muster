@@ -6,12 +6,17 @@
 
 ```
 Person   { id, name, ext: Map }
-Group    { id, name, defaults, timezone, ext: Map }
-Event    { id, name, window: Interval, kind, ext: Map }
+Group    { id, name, defaults, timezone?, ext: Map }
+Event    { id, name, window: Interval, kind, timezone?, ext: Map }
 Location { id, name, tier, portal, capacity?, geo?, ext: Map }
 Violation{ id, kind, severity, subjects[], detected_at, resolved_at,
            acknowledged_by, waiver_reason }
 ```
+
+Time (ADR-0024): `Interval` endpoints are UTC instants (`i64` µs) — the only
+comparison representation anywhere in the engine. `timezone` fields are IANA
+names, metadata for display and application-side recurrence expansion; the
+algebra never reads them. The engine only ever sees concrete instances.
 
 `tier ∈ {room, floor, structure, campus, region}` — containment position.
 `portal ∈ {none, pedestrian, vehicle, rail, ...}` — routing role.
