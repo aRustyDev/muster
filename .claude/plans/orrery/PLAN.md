@@ -6,7 +6,7 @@ Phases touching the engine. Entry/exit here; cross-product order at the root.
 |---|---|---|---|
 | 00 | ground and verify the handoff evidence | phases/00-grounding.md written | complete |
 | 1a | datastore paper screen (blocking) | 2–4 survivors; phases/01a-paper-screen.md | complete — Grafeo, agdb, Cozo (owner amendment) |
-| 02 | workspace, model, interval algebra, `Command`, `Repository` trait, `MemoryRepo` (Rule 00b enforcement) | phases/02-workspace.md criteria green | in progress |
+| 02 | workspace, model, interval algebra, `Command`, `Repository` trait, `MemoryRepo` (Rule 00b enforcement) | phases/02-workspace.md criteria green | complete |
 | 1b | Rust screening harness over the three survivors (non-blocking, parallel with 3–5) | order-of-magnitude losers eliminated; 2 finalists | not started |
 | 03 | detectors + brute-force oracles, derived expansion, salsa, digests | property tests green vs oracle | blocked by 02; QUESTION-0014 must close first |
 | 04 | travel Layer 1/2, `feasible(person, e1, e2)` landed | phases/04-travel.md | blocked by 03 |

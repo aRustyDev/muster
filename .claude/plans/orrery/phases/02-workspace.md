@@ -1,6 +1,6 @@
 # Phase 02 — Workspace, seams, and MemoryRepo
 
-* Status: `in-progress`
+* Status: `complete`
 * Blocks: Phases 3–5 (they build on the model types, interval algebra,
   repository trait, and `MemoryRepo` landed here) and Phase 1b (the Rust
   screening harness reuses the workspace)
@@ -21,24 +21,24 @@ constraint intersection confirmed in Phase 1a (Rule 00b).
 
 | # | Hypothesis | Falsified by | Status |
 |---|---|---|---|
-| H1 | MemoryRepo's constraints (single writer; no read during open write) can be enforced with **typed errors naming the constraint**, using only std synchronisation, without the trait leaking any enforcement type | enforcement requiring unsafe, global state, or constraint-specific types in the `Repository` signature | untested |
-| H2 | Half-open `[start, end)` interval algebra over `i64` microseconds passes property tests against a naive reference, including "exactly one of the 13 Allen relations holds" for positive-length pairs and converse-symmetry | any proptest counterexample | untested |
-| H3 | The draft SPEC-04 trait shape suffices for the Q1-shaped read path (memberships → bounded ancestor walk with constant-time per-hop filter → expectations) with only additive refinements | a required signature change that removes or semantically alters a drafted method | untested |
-| H4 | Phase 2 needs no dependency beyond the Rule-06 baseline subset {thiserror, serde, uuid v7, tracing} + proptest (dev) | any additional dependency (each would need its own phase-doc line per Rule 06) | untested |
-| H5 | Cross-hop traversal predicates are excluded **by construction** — the trait exposes no parameter through which a caller could express one — which is stronger than a runtime panic | any trait method accepting a caller-supplied per-hop callback/predicate over traversal state | untested |
+| H1 | MemoryRepo's constraints (single writer; no read during open write) can be enforced with **typed errors naming the constraint**, using only std synchronisation, without the trait leaking any enforcement type | enforcement requiring unsafe, global state, or constraint-specific types in the `Repository` signature | **confirmed** — `std::sync::RwLock` `try_read`/`try_write` → `OrreryError::ConstraintViolated{constraint}`; no unsafe, no globals, trait untouched |
+| H2 | Half-open `[start, end)` interval algebra over `i64` microseconds passes property tests against a naive reference, including "exactly one of the 13 Allen relations holds" for positive-length pairs and converse-symmetry | any proptest counterexample | **confirmed after one real defect** — the first `overlaps()` implementation contradicted its own documented empty-interval semantics (a zero-length point "overlapped" enclosing intervals); the unit suite caught it pre-commit. Fixed; all 7 property suites green |
+| H3 | The draft SPEC-04 trait shape suffices for the Q1-shaped read path with only additive refinements | a required signature change that removes or semantically alters a drafted method | **confirmed** — refinements were purely additive: entity `Upsert*` commands (the draft had no way to create entities, yet Rule 00.2 routes *all* mutations through the command layer), `AddSubgroup`, `AddTraversePair` (ADR-0008's single write site), `by: Actor` on `AddExpectation` (provenance), `travel` returning `TravelCost` |
+| H4 | Phase 2 needs no dependency beyond the Rule-06 baseline subset {thiserror, serde, uuid v7, tracing} + proptest (dev) | any additional dependency | **confirmed** — exactly that set; `anyhow` in `muster` only (Rule 04) |
+| H5 | Cross-hop traversal predicates are excluded **by construction** | any trait method accepting a caller-supplied per-hop callback/predicate over traversal state | **confirmed** — traversal methods take only constant `at: Timestamp`; there is no predicate-bearing parameter anywhere in `Repository` |
 
 ## Acceptance criteria (pre-committed)
 
 | Criterion | Threshold | Actual | Verdict |
 |---|---|---|---|
-| Workspace builds | `cargo build --workspace` clean | | |
-| Lint/format gates | `cargo fmt --check` and `cargo clippy --workspace --all-targets -- -D warnings` clean | | |
-| Tests | `cargo test --workspace` green, including proptest suites (default case counts) | | |
-| Rule 00b executable | tests assert: second concurrent writer → error naming "single-writer"; read during open write → error naming "read-during-write" | | |
-| Seam (Rule 00.1) | no concrete datastore identifier (sqlite/ladybug/cozo/grafeo/agdb/rusqlite) in `orrery`'s public API (grep of public surface; cargo-public-api when installed) | | |
-| Interval constructors | inverted intervals rejected; zero-length only via the explicit constructor (Rule 04) | | |
-| Migration audit | `./docs/scripts/check-xrefs.sh` passes from the repo root after migration | | |
-| Corrections visible | RESEARCH-0002/0003 carry dated addenda; harness fixes commented with provenance; no silent edits | | |
+| Workspace builds | `cargo build --workspace` clean | clean (rustc 1.97.1, 2026-08-01, this host) | pass |
+| Lint/format gates | `cargo fmt --check` and `cargo clippy --workspace --all-targets -- -D warnings` clean | both clean | pass |
+| Tests | `cargo test --workspace` green, including proptest suites (default case counts) | 9 unit + 7 proptest suites (256 cases each), all green | pass |
+| Rule 00b executable | tests assert: second concurrent writer → error naming "single-writer"; read during open write → error naming "read-during-write" | `second_writer_errors`, `read_during_open_write_errors` — both assert the constraint name in the error | pass |
+| Seam (Rule 00.1) | no concrete datastore identifier in `orrery`'s public API | grep of `crates/orrery/src` outside comments: clean (cargo-public-api not installed on this host — re-run `just orrery::check-seam` once it is) | pass |
+| Interval constructors | inverted rejected; zero-length only via explicit constructor | `Interval::new` rejects `end <= start`; `at_point` is the explicit path; tested | pass |
+| Migration audit | `./docs/scripts/check-xrefs.sh` passes from repo root | green (dangling: none; unqualified SPEC: none) | pass |
+| Corrections visible | dated addenda, no silent edits | RESEARCH-0002/0003 addenda; ADR-0015 provenance note; harness fixes commented in-file | pass |
 
 ## Plan
 
@@ -76,12 +76,54 @@ Design notes fixed in advance:
 
 ## Results
 
-*(pending)*
+Refutations and defects first (Rule 01.3):
+
+* **One real implementation defect caught by the gate**: `overlaps()` as
+  first written returned `true` for a zero-length interval against an
+  enclosing one, contradicting its own doc ("empty intervals overlap
+  nothing"). The unit suite caught it before commit; fixed with an
+  `is_empty` guard, and the property oracle (`max(start) < min(end)`)
+  independently agrees. A reminder that the doc-comment is a claim, not a
+  fact, until a test says so.
+* One test defect: an exact `f32` equality on the divergence analytic
+  (`|0.1 − 0.9|` ≠ `0.8` exactly in f32); replaced with a tolerance.
+
+Landed: three-crate workspace (`orrery` real; `muster-sdk`/`muster`
+compiling stubs); `Timestamp`/`Interval` with the 13 Allen relations,
+converse, merge, and the shared overlap predicate; id newtypes (UUIDv7,
+ADR-0022); all SPEC-01 relations including `Anchors` (with its Rule-09
+warning) and the effective-priority stack computed in exactly one place
+(ADR-0005); `Command` enum with stable variant names for spans and the
+future event log; sync `Repository` trait (ADR-0023) with cross-hop
+predicates unrepresentable; `MemoryRepo` with executable Rule-00b
+enforcement and `backend = "memory"` tracing spans on every operation
+(Rule 05, from the first implementation). The Q1-shaped integration test
+exercises the SPEC-05 critical fixture — a mid-chain expired `subgroup_of`
+edge — and asserts depth-0 expectations count (the semantics Phase 0 showed
+the original harness got wrong).
+
+Also in this phase: the handoff package migrated into the target tree with
+all Phase-0 corrections applied visibly (RESEARCH-0002/0003 addenda,
+ADR-0015 provenance note, harness fixes, count-drift fixes, audit-script
+hardening); Rules 08–09 written; six roster agents created; per-product
+plan derivations; root/crate/docs context files per Rule 07.
 
 ## Decisions produced
 
-*(pending)*
+* No new ADRs — ADR-0023 (sync trait) was Phase 1a's. Command-set additive
+  refinements recorded under H3 above; SPEC-04 remains the draft they refine
+  (spec update queued for Phase 3 when `Derive` lands).
+* QUESTION-0014 deliberately **not** closed here: `Timestamp(i64 µs UTC)` is
+  safe under all four options; the open part (zone retention, recurrence,
+  DST fixtures) gates Phase 3.
 
 ## Carry-forward
 
-*(pending)*
+| Item | Resolves in |
+|---|---|
+| Close QUESTION-0014 (zone retention on Event, recurrence ownership, DST fixtures per SPEC-05) | before Phase 3 detectors |
+| SPEC-04 updated from draft to match the landed trait + command set | Phase 3 |
+| `cargo-nextest` + `cargo-public-api` not installed on this host — `just ci`/`check-seam` degrade; install or adapt justfile | next toolchain touch |
+| Violation creation path (detectors write violations; only waive exists today) | Phase 3 |
+| Tier-legality checks on `within`/`traverse` (one module + exhaustive tests, relational-style) | Phase 3 |
+| Phase 1b screening harness reuses this workspace (Grafeo, agdb, Cozo) | Phase 1b |

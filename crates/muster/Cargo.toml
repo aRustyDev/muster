@@ -1,0 +1,12 @@
+[package]
+name = "muster"
+description = "Muster application: coordinator workflows over Orrery + Muster-SDK"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+orrery.workspace = true
+muster-sdk.workspace = true
+anyhow.workspace = true

@@ -2,7 +2,7 @@
 
 | Phase | Scope for muster | Exit condition | Status |
 |---|---|---|---|
-| 02 | compiling stub binary in the workspace | workspace builds | in progress |
+| 02 | compiling stub binary in the workspace | workspace builds | complete |
 | 06 | application surfaces in dependency order: member self-selection → coordinator groups → violation inbox → analytics → room assignment | phases/06-app.md | blocked by Phase 5 |
 
 **The muster spec set is deliberately thin** (one overview file) because the

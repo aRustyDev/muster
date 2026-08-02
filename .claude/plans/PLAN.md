@@ -30,7 +30,7 @@ Three hypotheses were refuted during that work. Expect more.
 | **Datastore** | **OPEN — ADR-0015**; funnel settled — ADR-0021; Stage A complete (phases/01a) — Grafeo, agdb, Cozo advance |
 | Rust graph landscape | surveyed — RESEARCH-0005 Stage A findings + 20 scorecards |
 | Repository trait shape | sync — ADR-0023 |
-| Implementation | Phase 2 in progress (phases/02-workspace.md) |
+| Implementation | Phase 2 complete (phases/02-workspace.md); Phases 1b/3 next |
 
 ## Phases
 
