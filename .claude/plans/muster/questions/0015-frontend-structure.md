@@ -2,7 +2,12 @@
 
 # QUESTION 0015 — Frontend structure, and where Dioxus may live
 
-* Status: **OPEN**
+* Status: **CLOSED — ADR-0025 (2026-08-02)**: muster-server (axum 0.8) +
+  muster-ui (dioxus 0.7, REST client, no server functions) + muster-types;
+  the leaning held under web-verification, with the counter-consideration
+  (fullstack can mount a self-owned axum router — the split buys churn
+  isolation and a framework-independent API, not capability) recorded in
+  the ADR.
 * Raised: 2026-08-01
 
 ## Question
