@@ -74,13 +74,21 @@ pub trait Repository: Send + Sync {
 `Command` is an enum, not a method set, so the event log (ADR-0016 D) is a
 serialisation concern rather than a refactor. Variants as landed:
 
-`UpsertPerson/Group/Event/Location` · `AddAttendance` · `SetPriority` ·
+`UpsertPerson/Group/Event/Location` · `AddAttendance` ·
+`RemoveAttendance` *(added Phase 6 slice 2, plan-review CR-6 — the first
+removal variant: member deselect; touches no mirrored fact class, audited
+against `incremental::refresh_after` at introduction; broader retraction
+is an Alpha pre-commitment item)* · `SetPriority` ·
 `AddMembership` · `AddSubgroup` · `AddExpectation` (carries `by: Actor` for
 provenance) · `HoldLocation` (carries `capacity_override`) ·
 `AddContainment` (tier-validated) · `AddTraversePair` (one call site writes
 both directed rows; sibling rule validated, `sibling_override` marker) ·
 `WaiveViolation` · `RecordViolation` · `ResolveViolation` ·
-`SetDerivedDigest`.
+`SetDerivedDigest` · `ReplaceClosure`.
+
+*(Read surface note, same date: `Repository::events_in(window)` added —
+the browse read; entity-set filter with the interval predicate on the
+repo side of the seam, per the trait-growth discipline.)*
 
 `CommandReceipt { seq: u64 }` — the future event log's sequence number.
 

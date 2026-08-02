@@ -30,11 +30,25 @@ pub struct DemoReport {
     pub lines: Vec<String>,
 }
 
-/// Build the demo world and walk the PoC story:
-/// Ada self-selects two overlapping talks (conflict appears, from engine
-/// records); her cohort's coordinator expects the evening social (a
-/// derived entry with provenance appears — no attendance write).
-pub fn run_demo() -> Result<DemoReport> {
+/// Ids and instants of the seeded demo world — what a test needs to drive
+/// the member flow against it (Phase 6 slice 2: extracted from `run_demo`
+/// so the Prototype e2e reuses the same world; extend, don't rewrite).
+#[derive(Debug, Clone, Copy)]
+pub struct DemoWorld {
+    pub member: PersonId,
+    pub cohort: GroupId,
+    pub talk_rust: EventId,
+    pub talk_systems: EventId,
+    pub social: EventId,
+    /// A whole-day evaluation window and a morning "now".
+    pub day: Interval,
+    pub now: Timestamp,
+}
+
+/// Seed the demo world: Ada, her cohort (with membership and the evening
+/// social expectation), three events, two rooms with holds. No selections
+/// — stories and tests drive those.
+pub fn build_demo_world() -> Result<(MusterService<MemoryRepo>, DemoWorld)> {
     let repo = MemoryRepo::new();
     let ada = PersonId::new();
     let cohort = GroupId::new();
@@ -103,19 +117,11 @@ pub fn run_demo() -> Result<DemoReport> {
     }
 
     let mut svc = MusterService::new(Engine::new(repo)?);
-    let day = iv(0, 24);
-    let now = Timestamp(8 * HOUR);
-    let mut lines = Vec::new();
 
-    // -- Act 1: Ada self-selects two overlapping talks.
-    svc.select(ada, talk_rust, Some(0.9), now, day)?;
-    let outcome = svc.select(ada, talk_systems, Some(0.7), now, day)?;
-    lines.push(format!(
-        "Ada selected two talks; the system immediately shows {} problem(s).",
-        outcome.conflicts.len()
-    ));
-
-    // -- Act 2: the cohort coordinator expects the social; Ada is a member.
+    // The cohort coordinator expects the social; Ada is a member. (Part of
+    // the seeded world since slice 2; the PoC applied these mid-story, but
+    // nothing in the story depends on the ordering — the derived entry has
+    // no attendance row either way.)
     svc.engine_mut().apply(Command::AddMembership {
         person: ada,
         group: cohort,
@@ -131,6 +137,40 @@ pub fn run_demo() -> Result<DemoReport> {
         cascades: true,
         by: Actor::System,
     })?;
+
+    Ok((
+        svc,
+        DemoWorld {
+            member: ada,
+            cohort,
+            talk_rust,
+            talk_systems,
+            social,
+            day: iv(0, 24),
+            now: Timestamp(8 * HOUR),
+        },
+    ))
+}
+
+/// Build the demo world and walk the PoC story:
+/// Ada self-selects two overlapping talks (conflict appears, from engine
+/// records); her cohort's expectation of the evening social shows as a
+/// derived entry with provenance — no attendance write.
+pub fn run_demo() -> Result<DemoReport> {
+    let (mut svc, w) = build_demo_world()?;
+    let (ada, day, now) = (w.member, w.day, w.now);
+    let mut lines = Vec::new();
+
+    // -- Act 1: Ada self-selects two overlapping talks.
+    svc.select(ada, w.talk_rust, Some(0.9), now, day)?;
+    let outcome = svc.select(ada, w.talk_systems, Some(0.7), now, day)?;
+    lines.push(format!(
+        "Ada selected two talks; the system immediately shows {} problem(s).",
+        outcome.conflicts.len()
+    ));
+
+    // -- Act 2 (since slice 2, seeded in the world): the expectation is
+    // already in force — Act 3 shows it as provenance.
 
     // -- Act 3: Ada's schedule — conflict flagged, provenance visible.
     let view = svc.my_schedule(ada, day, now)?;

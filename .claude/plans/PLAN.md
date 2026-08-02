@@ -128,6 +128,10 @@ Phase 6 the way 1b ran alongside 3–5:
    pre-committed in orrery/SPEC-03). Blocks the Muster **Beta** slice.
 3. Define the 10⁵ budget set the Orrery Alpha gate references (or restate
    the gate at 10⁶) — the stage is unexitable as currently written.
+4. *(Added 2026-08-02 during slice-2 implementation)* Anchor producer +
+   anchor→first-event feasibility consult (ADR-0014's core feature —
+   `Anchors` currently has no command and no storage, which also blocks
+   worlds-with-anchors privacy fixtures).
 
 Output: `phases/06a-engine-surfaces.md` (pre-committed at entry, per
 convention).

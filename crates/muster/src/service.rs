@@ -4,7 +4,7 @@ use orrery::command::Command;
 use orrery::engine::Engine;
 use orrery::error::Result;
 use orrery::interval::{Interval, Timestamp};
-use orrery::model::{AttendanceSource, EntityRef, EventId, GroupId, PersonId, Violation};
+use orrery::model::{Actor, AttendanceSource, EntityRef, EventId, GroupId, PersonId, Violation};
 use orrery::repo::Repository;
 
 pub struct MusterService<R: Repository> {
@@ -46,6 +46,17 @@ pub struct ScheduleView {
     pub entries: Vec<ScheduleEntry>,
 }
 
+/// One browsable event (PRD Flow A: browse — events with room and time).
+#[derive(Debug, Clone, PartialEq)]
+pub struct EventSummary {
+    pub event: EventId,
+    pub name: String,
+    pub window: Interval,
+    /// Primary room name: first non-overflow hold, ties to the smaller
+    /// location id — the same rule the engine uses for placement.
+    pub room: Option<String>,
+}
+
 impl<R: Repository> MusterService<R> {
     pub fn new(engine: Engine<R>) -> Self {
         MusterService { engine }
@@ -55,6 +66,29 @@ impl<R: Repository> MusterService<R> {
     /// first-class service calls (Alpha).
     pub fn engine_mut(&mut self) -> &mut Engine<R> {
         &mut self.engine
+    }
+
+    /// PRD Flow A: browse. The repo does the window filtering
+    /// (`events_in` — the interval predicate stays on the engine side of
+    /// the seam); this layer only joins room names for display.
+    pub fn events(&self, window: Interval) -> Result<Vec<EventSummary>> {
+        let repo = self.engine.repo();
+        let mut out = Vec::new();
+        for e in repo.events_in(window)? {
+            let mut holds = repo.held_for_event(e.id)?;
+            holds.sort_by_key(|h| (h.overflow_for.is_some(), h.location));
+            let room = match holds.first() {
+                Some(h) => repo.location(h.location)?.map(|l| l.name),
+                None => None,
+            };
+            out.push(EventSummary {
+                event: e.id,
+                name: e.name,
+                window: e.window,
+                room,
+            });
+        }
+        Ok(out)
     }
 
     /// PRD Flow A: select → the engine records it → conflicts come back
@@ -72,6 +106,41 @@ impl<R: Repository> MusterService<R> {
             event,
             priority,
         })?;
+        self.engine.sweep(at, window)?;
+        let conflicts = self.violations_touching(person)?;
+        Ok(SelectionOutcome {
+            seq: receipt.seq,
+            conflicts,
+        })
+    }
+
+    /// PRD Flow A / FR-2: the member sets a personal priority on their own
+    /// selection. Coordinator suggestions and overrides (FR-5) are Alpha
+    /// scope and will pass `binding` explicitly.
+    pub fn set_priority(&mut self, person: PersonId, event: EventId, value: f32) -> Result<u64> {
+        let receipt = self.engine.apply(Command::SetPriority {
+            person,
+            event,
+            by: Actor::Member(person),
+            binding: false,
+            value,
+        })?;
+        Ok(receipt.seq)
+    }
+
+    /// PRD Flow A "resolve": remove the selection. The engine's sweep then
+    /// auto-resolves violations whose cause disappeared — this layer
+    /// computes nothing (plan-review CR-6 landed `RemoveAttendance`).
+    pub fn deselect(
+        &mut self,
+        person: PersonId,
+        event: EventId,
+        at: Timestamp,
+        window: Interval,
+    ) -> Result<SelectionOutcome> {
+        let receipt = self
+            .engine
+            .apply(Command::RemoveAttendance { person, event })?;
         self.engine.sweep(at, window)?;
         let conflicts = self.violations_touching(person)?;
         Ok(SelectionOutcome {

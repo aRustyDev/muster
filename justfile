@@ -6,10 +6,11 @@
 
 set unstable := true
 
-mod orrery     'crates/orrery/justfile'
-mod muster_sdk 'crates/muster-sdk/justfile'
-mod muster     'crates/muster/justfile'
-mod docs       'docs/justfile'
+mod orrery        'crates/orrery/justfile'
+mod muster_sdk    'crates/muster-sdk/justfile'
+mod muster        'crates/muster/justfile'
+mod muster_server 'crates/muster-server/justfile'
+mod docs          'docs/justfile'
 
 # Prerequisites: just>=1.31 · cargo-nextest · cargo-public-api · mdbook · python3
 # Install:  cargo install cargo-nextest cargo-public-api mdbook

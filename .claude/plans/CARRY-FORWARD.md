@@ -53,6 +53,7 @@ slice.*
 | Item | Origin | Notes |
 |---|---|---|
 | Non-persisting digest dry-run (expectation/membership overlay → change-set preview equal to post-commit `refresh_digests`) | review CR-2; muster/SPEC-02:18 | the honesty gate is already spec'd (muster/SPEC-03:17-21) |
+| Anchor producer + anchor→first-event feasibility consult (ADR-0014 core feature; `Anchors` has no command and no storage today, so worlds-with-anchors fixtures are impossible — the slice-2 privacy test records this) | 04-travel.md:107 (expired "Phase 5/6"); review MO-4 | *(row added 2026-08-02 during slice-2 implementation — the review re-homed this item but the initial ledger draft omitted the row)* |
 | Analytics surface: engagement, capacity pressure, divergence, bounded 2-hop co-attendance | review CR-4; orrery/SPEC-02:68-73 | 2-hop has a pre-committed budget (<50 ms p95, orrery/SPEC-03:14) |
 | Define the 10⁵ budget set (or restate Orrery Alpha gate at 10⁶) | review CR-4 | Orrery Alpha is unexitable as written |
 | Attendance-model hook (orrery "○ hook" side): make the capacity-interest threshold an injectable strategy | ROADMAP.md:17; review (engine item 7) | SDK impl side stays SDK-owned |

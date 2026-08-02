@@ -129,6 +129,19 @@ impl Repository for MemoryRepo {
         Ok(v)
     }
 
+    fn events_in(&self, window: Interval) -> Result<Vec<Event>> {
+        let _s = tracing::info_span!("repo.events_in", backend = "memory").entered();
+        let mut v: Vec<Event> = self
+            .read()?
+            .events
+            .values()
+            .filter(|e| e.window.overlaps(&window))
+            .cloned()
+            .collect();
+        v.sort_by_key(|e| (e.window.start(), e.id));
+        Ok(v)
+    }
+
     fn attends_for_event(&self, id: EventId) -> Result<Vec<Attends>> {
         let _s = tracing::info_span!("repo.attends_for_event", backend = "memory").entered();
         Ok(self
@@ -347,6 +360,15 @@ impl Repository for MemoryRepo {
                     source: AttendanceSource::SelfSelected,
                     pinned: false,
                 });
+            }
+            Command::RemoveAttendance { person, event } => {
+                let before = state.attends.len();
+                state
+                    .attends
+                    .retain(|a| !(a.person == person && a.event == event));
+                if state.attends.len() == before {
+                    return Err(OrreryError::NotFound(EntityRef::Person(person)));
+                }
             }
             Command::SetPriority {
                 person,
@@ -717,6 +739,45 @@ mod tests {
         assert_eq!(a.priority_person, Some(0.9), "user input never destroyed");
         let div = a.divergence().unwrap();
         assert!((div - 0.8).abs() < 1e-6, "divergence ~0.8, got {div}");
+    }
+
+    /// Phase 6 slice 2 (plan-review CR-6): deselect removes exactly the
+    /// (person, event) edge; removing a non-existent edge is an error, not
+    /// a silent no-op.
+    #[test]
+    fn remove_attendance_removes_edge_and_errors_when_absent() {
+        let repo = MemoryRepo::new();
+        let p = person("m");
+        let (e1, e2) = (event("kept", iv(0, 10)), event("dropped", iv(0, 10)));
+        let (pid, kept, dropped) = (p.id, e1.id, e2.id);
+        repo.apply(Command::UpsertPerson(p)).unwrap();
+        repo.apply(Command::UpsertEvent(e1)).unwrap();
+        repo.apply(Command::UpsertEvent(e2)).unwrap();
+        for eid in [kept, dropped] {
+            repo.apply(Command::AddAttendance {
+                person: pid,
+                event: eid,
+                priority: None,
+            })
+            .unwrap();
+        }
+
+        repo.apply(Command::RemoveAttendance {
+            person: pid,
+            event: dropped,
+        })
+        .unwrap();
+        let left = repo.attends_for(pid, iv(0, 10)).unwrap();
+        assert_eq!(left.len(), 1);
+        assert_eq!(left[0].event, kept);
+
+        let err = repo
+            .apply(Command::RemoveAttendance {
+                person: pid,
+                event: dropped,
+            })
+            .unwrap_err();
+        assert!(matches!(err, OrreryError::NotFound(_)), "{err:?}");
     }
 
     fn room(name: &str) -> Location {
