@@ -1,4 +1,11 @@
+---
+paths:
+  - "crates/**"
+---
+
 # Rule 05 — Observability
+<!-- paths:-scoped 2026-08-03 (ADR-0027): loads when crate files are read -->
+
 
 ## Libraries instrument; binaries configure
 

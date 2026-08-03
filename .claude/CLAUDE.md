@@ -39,9 +39,29 @@ executing. Prefer incremental delivery — MVP scope first.
 * Derived semantics, cached physically. The blast radius of a membership write
   is unbounded and invisible; salsa early cutoff is what makes it computable.
 
-<!-- TODO: Updating Context Files -->
-<!-- TODO: Updating Context Files - When (ie what triggers updates, what should be kept in context files?) -->
-<!-- TODO: Updating Context Files - Where (ie what kind of context update goes where?) -->
-<!-- TODO: Reviewing Context Files - When (ie what triggers reviews of context files?) -->
-<!-- TODO: Adding/Recording Skills -->
-<!-- TODO: Reviewing/Updating Skills -->
+## Context files: what, when, where (ADR-0027)
+
+Context files carry **constraints and orientation**, not knowledge —
+durable knowledge goes to `docs/src/` (placement table: Rule 10). A
+binding convention stated in conversation lands in a rule or `docs/src/`
+**before the session ends**, or becomes a ledger row.
+
+* **Update on**: slice close (protocol step) · a refutation or correction
+  landing · an owner decision changing a constraint.
+* **Review on**: every compaction (hook-injected reminder) and every
+  slice close — scan loaded instructions against repo state; fix stale
+  instances now or ledger them (the F-13 fix).
+* **Where**: decision→ADR · enforcement→policy (artifact gate) or rule
+  (agent behavior) · goal→strategy · recipe→pattern · orientation→
+  AGENTS.md · personal→`CLAUDE.local.md` (gitignored, never committed).
+
+## Skills, agents, scripts, hooks: built from evidence (ADR-0027 §7–8)
+
+Create from **ledger evidence** (`.claude/observations.md` — harvest at
+compaction and slice close; rule of three graduates a candidate), never
+from taste. Boundary: a *skill* packages a repeatable procedure for the
+main context; an *agent* buys a separate context window and tool
+sandbox; **an agent without a named output artefact is a chat**. A
+misfiring or drifted skill/agent is a ledger row; the roster is reviewed
+against current platform guidance at each CR slice, citing the guidance
+version checked against.

@@ -1,4 +1,13 @@
+---
+paths:
+  - "crates/**"
+  - "**/*.rs"
+  - "**/Cargo.toml"
+---
+
 # Rule 04 — Rust conventions
+<!-- paths:-scoped 2026-08-03 (ADR-0027): loads when Rust/manifest files are read -->
+
 
 ## Errors
 
