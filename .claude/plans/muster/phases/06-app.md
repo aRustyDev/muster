@@ -1,8 +1,9 @@
 # Phase 06 — Muster application
 
 * Status: `in-progress` — slices 1 (PoC) and 2 (Prototype) complete; Alpha
-  next, **blocked by Phase 6a** (non-persisting digest preview — engine
-  work, see PLAN.md)
+  next, ~~blocked by Phase 6a~~ **unblocked 2026-08-02**: Phase 6a closed
+  same day (`orrery/phases/06a-engine-surfaces.md` — preview primitive,
+  analytics, anchors, Orrery Alpha gate met)
 * Blocks: nothing downstream yet (MVP chain continues within this phase)
 * Blocked by: Phases 3–5 (complete — engine, travel, SDK all exist)
 

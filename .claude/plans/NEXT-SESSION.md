@@ -1,8 +1,8 @@
-# Next-session kickoff — Phase 6a: engine surfaces for the app
+# Next-session kickoff — Muster Alpha (Phase 6 slice 3)
 
-*Rewritten 2026-08-02 at the Phase-6 Prototype close (this file is
-rewritten at each slice merge). Paste the prompt below into a fresh
-session in this repo.*
+*Rewritten 2026-08-02 at the Phase-6a close (this file is rewritten at
+each slice merge). Paste the prompt below into a fresh session in this
+repo.*
 
 ---
 
@@ -10,54 +10,62 @@ You are continuing the Orrery/Muster build. Your project memory has the
 orientation pointers; the repo is the state of truth.
 
 **Ground yourself (short — you have done this before):**
-`.claude/CLAUDE.md` + `.claude/rules/**` (binding; Rules 01/03/04
-especially), `.claude/plans/PLAN.md` current-state table and its
-**Phase 6a** section, `.claude/plans/CARRY-FORWARD.md` (the living
-backlog — Phase 6a and Muster Alpha sections are your scope), the
-2026-08-02 plan review (`orrery/artifacts/plan-review-2026-08-02.md`,
-findings CR-1/CR-2/CR-4), and `muster/phases/06-app.md` slice-2 Results.
-Workspace state: **72 tests green on `main`**; run
-`cargo nextest run --workspace` before you start and stop if that is not
-what you see.
+`.claude/CLAUDE.md` + `.claude/rules/**` (binding; Rules 01/03/04/09
+especially), `.claude/plans/PLAN.md` current-state table,
+`.claude/plans/CARRY-FORWARD.md` **Muster Alpha section — the slice
+pre-commits against every row there**, `muster/phases/06-app.md`
+(slices 1–2 Results), and `orrery/phases/06a-engine-surfaces.md` (the
+engine surfaces you now have: `preview_digests` with the honesty
+property already proven engine-side, `analytics`, `AddAnchor` +
+`first_event_feasibility`). Workspace state: **91 tests green on
+`main`** (+1 deliberately ignored measurement harness); run
+`cargo nextest run --workspace` before you start and stop if that is
+not what you see.
 
-**The slice: Phase 6a (orrery) — engine surfaces the app's next stages
-need.** Branch `feat/phase-06a-engine-surfaces`. Write
-`.claude/plans/orrery/phases/06a-engine-surfaces.md` with pre-committed
-hypotheses/criteria (PHASE-TEMPLATE; standing plain-language-artifact
-criterion) BEFORE implementing. Contents, from PLAN.md Phase 6a:
+**The slice: Muster Alpha (06-app.md slice 3) — coordinator flow.**
+ROADMAP gate: **"groups, expectations, blast-radius preview, violation
+inbox — coordinator flow complete."** Branch `feat/phase-06-alpha`.
+Write the slice-3 pre-commitment in `muster/phases/06-app.md` BEFORE
+implementing (hypotheses + criteria + the standing plain-language
+artifact row). The ledger's Muster Alpha section is the scope contract;
+its rows, compressed:
 
-1. **Non-persisting digest dry-run** — evaluate a hypothetical
-   expectation/membership against current state and return the would-be
-   change set WITHOUT writing (blocks Muster Alpha's blast-radius
-   preview; the honesty gate is pre-specified: preview must equal the
-   post-commit `refresh_digests` change set, property-tested —
-   muster/SPEC-03:17-21). Design constraint from review CR-1: the salsa
-   mirror invalidates only through `Engine::apply` — an overlay
-   evaluation must not corrupt it.
-2. **Analytics surface**: engagement, capacity pressure, divergence,
-   bounded 2-hop co-attendance (orrery/SPEC-02 FRs; 2-hop budget <50 ms
-   p95 pre-committed in orrery/SPEC-03:14). Blocks Muster Beta.
-3. **Define the 10⁵ budget set** the Orrery Alpha gate references (or
-   restate the gate at 10⁶ with a dated ROADMAP edit).
-4. **Anchor producer** (command + storage) and the anchor→first-event
-   feasibility consult (ADR-0014's core feature) — this also unblocks the
-   owed worlds-with-anchors privacy fixtures (slice-2 Results item 2).
+1. Coordinator service calls (`create_group`, `add_member`, `expect`)
+   replacing the `engine_mut` escape hatch; inbox + waive (actor +
+   timestamp per Rule 09).
+2. Blast-radius preview: service `preview_expectation` over
+   `Engine::preview_digests` + the muster-level honesty property test
+   (muster/SPEC-03:17-21) + presentation.
+3. **Person-scoped `select()` evaluation** — non-optional (slice-2 H4
+   refuted in spirit: whole-window sweep measured p50 97.8 ms / p95
+   102.4 ms at 10³ persons, zero headroom). Conflicts must still land
+   as records.
+4. `Warn` policy: define observable semantics or shrink the enum by ADR;
+   document partial-`Prevent` (2 of 7 kinds) in a spec note.
+5. Group-scoped violation query (`inbox(filter)`): decide repo query vs
+   engine surface vs measured app-side join.
+6. Retraction commands beyond `RemoveAttendance` (membership /
+   expectation / hold end-or-shorten) — CR-6 follow-through; audit
+   `refresh_after` for every new kind (membership/expectation kinds DO
+   touch mirrored facts, unlike the removal precedent).
+7. Privacy tests extend to coordinator-facing DTOs on worlds with
+   anchors (worlds exist now — Phase 6a).
+8. Severity defaults product confirmation (owner touchpoint if needed).
+9. OTLP exporter wiring behind the existing `exporter` knob (needs a
+   collector; keep deferral honest if none exists).
+10. muster-ui REST client + `dx` web entrypoint + UI content
+    (components/type-sharing landed in slice 2).
 
-Known trap: `incremental::refresh_after` string-matches command kinds —
-any new command touching memberships/subgroups/expectations must be added
-by hand, and an anchor command must NOT be (audit it in writing, as
-slice 2 did for `RemoveAttendance`).
+Known traps: `incremental::refresh_after` string-matches command kinds —
+new membership/expectation retraction commands MUST be added to the
+match by hand (and tested); the `AddAnchor`/`RemoveAttendance` audit
+comments show the no-op form. `Engine::preview_digests` rejects
+non-mirrored kinds with `PreviewUnsupported` (muster-server already maps
+it to 400).
 
-Then, if the slice closes with room to spare, open the **Muster Alpha**
-pre-commitment (06-app.md slice 3) — its ledger section is already
-populated (coordinator flow, inbox+waive, Warn semantics decision,
-group-scoped violation query, retraction commands, severity defaults,
-person-scoped `select()` — the H4 refutation made that one
-non-optional).
-
-Gates as always (nextest, clippy -D warnings, fmt, check-seam grep
-fallback — no rustup on this host — check-scope, check-xrefs). Results
-refutations-first; plain-language artifact in
-`plans/orrery/artifacts/`; merge `--no-ff`; update PLAN rows and tick
+Gates as always (nextest, clippy -D warnings, fmt, doc-check, check-seam
+grep fallback — no rustup on this host — check-scope, check-xrefs).
+Results refutations-first; plain-language artifact in
+`plans/muster/artifacts/`; merge `--no-ff`; update PLAN rows and tick
 the ledger; rewrite this file. Conventional Commits; `Refs:` footers;
 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
