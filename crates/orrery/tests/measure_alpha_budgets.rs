@@ -11,6 +11,16 @@
 //! binaries), and a debug-profile verdict would indict the compiler, not
 //! the engine. Debug numbers may be recorded alongside for transparency.
 //!
+//! Variance treatment (added 2026-08-03, QF slice / QR-2 W-2, F-5): the
+//! per-person classes carry within-run distributions (stride samples,
+//! p50/p95) and now take one untimed warm-up call per block. The one-shot
+//! rows (cold open, closure refresh, sweep) are deliberately NOT repeated
+//! in-process — a second in-process run would measure warm salsa/cache
+//! paths, not the cold semantics the budgets are written against. Their
+//! run-to-run variance is taken at process level: run the whole harness
+//! ≥3 times and record the median and max of every row in the phase doc
+//! (the 01b screening discipline, restored).
+//!
 //! `#[ignore]` by design: the whole-horizon sweep at this scale costs
 //! tens of seconds (dominated by `travel_best`'s linear closure scan),
 //! which would tax every workspace gate run. Run explicitly:
@@ -70,6 +80,11 @@ fn pctl(sorted_us: &[u128], p: usize) -> u128 {
 }
 
 fn sample<F: FnMut(PersonId)>(persons: &[PersonId], stride: usize, mut f: F) -> Vec<u128> {
+    // One untimed warm-up call per block (W-2, 2026-08-03): first-call
+    // effects belong to no sample's distribution.
+    if let Some(p) = persons.first() {
+        f(*p);
+    }
     let mut out = Vec::new();
     for p in persons.iter().step_by(stride) {
         let t0 = Instant::now();

@@ -20,6 +20,29 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/aRustyDev/muster"
 
+# Added 2026-08-03 (QF slice, QR-2 W-4/W-13): every crate is unsafe-free
+# in practice; this makes that a compiler-enforced policy (crates opt in
+# via `[lints] workspace = true`). Clippy severity deliberately stays in
+# the `just lint` recipe (`-D warnings` at gate time, not on every dev
+# build); this table carries only always-true policy.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+# Pinned 2026-08-03 (QF slice, QR-2 W-4): these are the cargo DEFAULTS —
+# written out because every measure_ baseline (H4, Phase 6a) was taken
+# under them, and a silent profile change would invalidate those numbers.
+# Changing anything here requires re-baselining per the variance policy
+# (W-2 / TESTING-STRATEGY).
+[profile.release]
+opt-level = 3
+debug = false
+lto = false
+codegen-units = 16
+panic = "unwind"
+
+[profile.bench]
+inherits = "release"
+
 # Single version source (Rule 06 / ADR-0022). Crates declare
 # `dep.workspace = true`. Adding a dependency to orrery requires an ADR;
 # to muster-sdk or muster, a phase-document line.

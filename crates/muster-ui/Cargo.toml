@@ -15,3 +15,6 @@ muster-types.workspace = true
 # by workspace CI on the host) carries components only.
 default = []
 web = ["dioxus/web"]
+
+[lints]
+workspace = true

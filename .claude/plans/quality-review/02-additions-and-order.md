@@ -627,10 +627,22 @@ the version are RR&P-7's validation adoption (feat(muster-server), rides
    RR&P-1 cannot close without the owner confirming the repo host and
    hosted-vs-self-hosted preference. Sub-decision: the cargo-deny license
    allow-list (W-5) is a one-line owner call.
+   *Answered 2026-08-03 (owner): **GitHub Actions confirmed.** The
+   inference is now a decision; RR&P-1's remaining questions are runner
+   strategy (hosted macOS vs Linux legs vs self-hosted) and the minimal
+   first gate set. The W-5 license allow-list was implemented provisional
+   (permissive set matching the workspace's MIT OR Apache-2.0) pending
+   the one-line confirmation.*
 3. **Human-protocol appetite** — how much usability formality pre-1.0:
    the "unaided" MVP gate definition, accessibility level for RC
    (RR&P-8 will propose a measurable floor), and MO-8's trial-protocol
    debts. F-10's gates stay owned-but-undefined until this is answered.
+   *Status 2026-08-03 (owner): deferred knowingly — the owner wants to
+   understand the question better before answering. Shape of when it
+   actually bites: the a11y half arrives as RR&P-8's concrete proposal
+   at the Alpha pre-commitment (react, don't pre-decide); the
+   unaided/trial-protocol half is owed no earlier than the MVP
+   pre-commitment. Nothing blocks before those points.*
 
 ## Stage-E handoff (what QR-3 lands, where — the mechanical map)
 

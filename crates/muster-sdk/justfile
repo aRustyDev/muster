@@ -20,7 +20,33 @@ bench:
 lint:
     cargo clippy -p muster-sdk --all-targets --all-features -- -D warnings
 
-# fails if a UI dependency leaks into the SDK (Rule 03 / QUESTION-0015)
+# fails if a UI/server dependency leaks into the SDK (Rule 03 /
+# QUESTION-0015). Rewritten 2026-08-03 (QF slice, QR-2 W-15/F-8): the old
+# `… && (echo … && exit 1) || true` shape swallowed the subshell's exit —
+# the gate could NEVER fail (verified by execution) — and its four-name
+# denylist passed actix/rocket/warp/etc. Names match `<crate> v` in
+# cargo-tree output to avoid substring false positives.
 check-scope:
-    cargo tree -p muster-sdk | grep -Ei 'dioxus|leptos|yew|axum' \
-      && (echo "SCOPE VIOLATION: UI/server dep in muster-sdk" && exit 1) || true
+    #!/usr/bin/env bash
+    set -euo pipefail
+    PAT=' (dioxus|leptos|yew|axum|actix|rocket|warp|salvo|poem|tide|gotham|iced|egui|tauri)[a-z0-9_-]* v'
+    if cargo tree -p muster-sdk | grep -Ei "$PAT"; then
+      echo "SCOPE VIOLATION: UI/server dep in muster-sdk"; exit 1
+    fi
+    echo "scope clean"
+
+# violations flow one way — the SDK constructs no ViolationKind, calls no
+# detector, re-implements no interval overlap (SPEC-03 boundary). This was
+# a *manual* "source grep at phase close"; automated 2026-08-03 (QR-2
+# SDK-3) with the pattern the phase-doc boundary greps pre-committed.
+# Scope is src/ ONLY, deliberately: tests/ contains the brute-force oracle,
+# which SPEC-03 *requires* to independently re-implement overlap, and test
+# assertions that match on engine-produced kinds (consuming, not
+# constructing). Found by this gate's own first run, 2026-08-03.
+check-oneway:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if grep -rnE 'ViolationKind::|detect::|overlaps\(' src/; then
+      echo "ONE-WAY VIOLATION: feasibility semantics in muster-sdk src/"; exit 1
+    fi
+    echo "one-way boundary clean (src/; test oracles excluded by design)"
