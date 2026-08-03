@@ -22,7 +22,7 @@ depend on it. Hard schema constraints make both impossible.
 Detection, with violations as first-class records rather than ad-hoc computed
 results:
 
-```
+```text
 violation(id, kind, severity, subjects[], detected_at, resolved_at,
           acknowledged_by, waiver_reason)
 ```

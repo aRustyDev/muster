@@ -14,7 +14,7 @@ need a home.
 
 Orrery's contract is the feasibility oracle and the objective evaluator:
 
-```
+```text
 is_feasible(assignment) -> Vec<Violation>
 score(assignment)       -> f64
 ```

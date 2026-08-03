@@ -14,7 +14,7 @@ coordinator who may either *suggest* or *override*.
 
 Store all three plus a binding flag; compute an effective value.
 
-```
+```text
 attends.priority_group        f32   -- from expects.default_priority
 attends.priority_person       f32?  -- the user's own
 attends.priority_coord        f32?

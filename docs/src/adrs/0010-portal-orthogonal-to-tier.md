@@ -16,7 +16,7 @@ Collapse stations into `Structure`. A station conflates two orthogonal facts:
 what it **is** (a containable structure that contains platforms) and what
 **role** it plays (a network attachment point). Separate them:
 
-```
+```text
 location.tier   ∈ {room, floor, structure, campus, region}  -- containment
 location.portal ∈ {none, pedestrian, vehicle, rail, ...}    -- routing role
 ```

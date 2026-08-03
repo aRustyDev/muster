@@ -12,7 +12,7 @@ weights, and audiences.
 
 ## Decision Outcome
 
-```
+```text
 crates/orrery      -- entities, interval algebra, violations, travel,
                       derived expansion, feasibility oracle, scoring,
                       persistence trait

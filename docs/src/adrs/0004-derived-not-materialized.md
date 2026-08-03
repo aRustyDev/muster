@@ -33,7 +33,7 @@ tracking.
 
 Provenance is carried regardless:
 
-```
+```text
 attends.source ∈ {self, group:<id>, coordinator:<id>}
 attends.pinned bool   -- true when the user edits it
 ```
