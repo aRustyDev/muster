@@ -38,3 +38,10 @@ executing. Prefer incremental delivery — MVP scope first.
   R\*Tree measured 2x *slower* than a plain composite b-tree.
 * Derived semantics, cached physically. The blast radius of a membership write
   is unbounded and invisible; salsa early cutoff is what makes it computable.
+
+<!-- TODO: Updating Context Files -->
+<!-- TODO: Updating Context Files - When (ie what triggers updates, what should be kept in context files?) -->
+<!-- TODO: Updating Context Files - Where (ie what kind of context update goes where?) -->
+<!-- TODO: Reviewing Context Files - When (ie what triggers reviews of context files?) -->
+<!-- TODO: Adding/Recording Skills -->
+<!-- TODO: Reviewing/Updating Skills -->
