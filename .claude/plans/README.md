@@ -1,5 +1,27 @@
 # plans/ — layout and derivation
 
+## Moved to docs/src (2026-08-03, ADR-0027 — the old→new map)
+
+`docs/src/` is the durable reference home (decisions, strategies,
+policies, patterns, roadmaps, glossary); `plans/` holds the working
+corpus. Historical documents below this date reference the old paths —
+resolve them here:
+
+| Old path | New home |
+|---|---|
+| `docs/src/adrs/NNNN-*.md` (flat) | `docs/src/dev/adrs/<topic>/NNNN-*.md` (topic table: `dev/adrs/README.md`) |
+| `plans/GLOSSARY.md` | `docs/src/dev/glossary.md` |
+| `plans/TESTING-STRATEGY.md` §Taxonomy | `docs/src/dev/strategies/testing/coverage-taxonomy.md` |
+| §Tool roster + RR&P + reading list | `docs/src/dev/strategies/testing/tool-roster.md` |
+| §Measurement-variance (W-2) | `docs/src/dev/policies/benchmarking/measurement-variance.md` |
+| §Property naming/budgets + §Regression | `docs/src/dev/policies/testing/property-and-regression.md` |
+| §Standing policies | `docs/src/dev/policies/testing/standing-policies.md` |
+| §Test doubles | `docs/src/dev/patterns/testing/test-doubles.md` |
+
+`docs/src/dev/roadmaps/` is reserved for cross-plan summarizing
+roadmaps (owner ruling 2026-08-03): PLAN.md and ROADMAP.md are
+plan-specific and **stay here**.
+
 ## Why the overall PLAN.md and ROADMAP.md live at the plans/ root
 
 **The roadmap's primary job is drawing boundaries *between* the three

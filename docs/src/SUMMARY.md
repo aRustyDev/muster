@@ -48,3 +48,7 @@
 # Patterns
 
 - [Testing pattern: test doubles — placement and strategy (T-4, C8)](dev/patterns/testing/test-doubles.md)
+
+# Reference
+
+- [Glossary](dev/glossary.md)
