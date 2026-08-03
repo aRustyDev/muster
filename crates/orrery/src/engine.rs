@@ -566,8 +566,11 @@ pub trait FeasibilityOracle {
 }
 
 /// Severity weights for `score` (documented in phases/03-engine-core.md;
-/// muster-sdk composes richer objectives on top — ADR-0013).
-fn severity_weight(s: Severity) -> f64 {
+/// muster-sdk composes richer objectives on top — ADR-0013). Public since
+/// 2026-08-03 (QF slice, QR-2 SDK-7): this is THE definition of severity
+/// cost — muster-sdk's `ViolationCost` consumes it rather than carrying a
+/// duplicate table that could silently diverge.
+pub fn severity_weight(s: Severity) -> f64 {
     match s {
         Severity::Hard => 100.0,
         Severity::Warning => 10.0,

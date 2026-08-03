@@ -3,7 +3,7 @@
 //! explanation of the objective, not a second objective — `total` is
 //! exactly `Σ weight × cost` over its rows.
 
-use orrery::model::{Severity, Violation};
+use orrery::model::Violation;
 
 use crate::{Placement, RoomOption, RoomRequest};
 
@@ -75,10 +75,12 @@ impl Objective {
     }
 }
 
-/// Severity-weighted violation cost — the same weights as `engine.score`
-/// (Hard 100 / Warning 10 / Info 1), so `ViolationCost` at weight 1.0
-/// equals `−score` on the same overlay: one definition of severity cost,
-/// two call sites.
+/// Severity-weighted violation cost — literally the engine's weights
+/// (`orrery::engine::severity_weight`), so `ViolationCost` at weight 1.0
+/// equals `−score` on the same overlay. Single-sourced 2026-08-03 (QF
+/// slice, QR-2 SDK-7): the local Hard/Warning/Info table this carried
+/// could diverge from the engine's; now there is one definition and two
+/// call sites, as the doc always claimed.
 pub struct ViolationCost {
     pub weight: f64,
 }
@@ -93,11 +95,7 @@ impl Term for ViolationCost {
     fn cost(&self, ctx: &EvalCtx<'_>) -> f64 {
         ctx.violations
             .iter()
-            .map(|v| match v.severity {
-                Severity::Hard => 100.0,
-                Severity::Warning => 10.0,
-                Severity::Info => 1.0,
-            })
+            .map(|v| orrery::engine::severity_weight(v.severity))
             .sum()
     }
 }
