@@ -12,7 +12,7 @@ Orrery does not schedule. It decides whether a schedule is possible.
 1. `.claude/rules/**` — binding constraints on how you work
 2. `PLAN.md` — phases · `ROADMAP.md` — boundaries and stage gates
 3. `.claude/plans/*/prds/` — what each product is and why
-4. `docs/src/adrs/` — the decision corpus; **ADR-0015 is open**
+4. `docs/src/dev/adrs/` — the decision corpus; **ADR-0015 is open**
 5. `.claude/plans/orrery/specs/` — model, requirements, API, tests
 6. `evidence/README.md` — reproduce before trusting
 

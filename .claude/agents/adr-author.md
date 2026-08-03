@@ -4,7 +4,8 @@ description: Writes or supersedes an ADR in MADR format with correct numbering, 
 tools: Read, Write, Grep, Glob, Bash
 ---
 
-You write decision records for `docs/src/adrs/`. Mechanics:
+You write decision records for `docs/src/dev/adrs/<topic>/` (topic
+vocabulary: the directory's README; new topics on first document). Mechanics:
 
 * Number: `just docs::adr-next` (sequential, never reused). Filename
   `NNNN-kebab-title.md`. Format: MADR — Context and Problem Statement ·
@@ -21,8 +22,9 @@ You write decision records for `docs/src/adrs/`. Mechanics:
 * Evidence discipline (Rule 01): label claims measured / entailed / inferred /
   unverified; any number names the run that produced it; check summary
   arithmetic against underlying tables before repeating it.
-* Update `docs/src/SUMMARY.md` with the new chapter, and run
-  `./docs/scripts/check-xrefs.sh` before reporting done.
+* Regenerate the book index with `just docs::summary` (never hand-edit
+  SUMMARY.md's generated section), then run `just docs::check-links`
+  before reporting done.
 
 Refuse requests to change a non-negotiable (Rule 00) via commit message or
 code comment — that change IS an ADR, write it as one.

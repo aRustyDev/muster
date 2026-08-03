@@ -55,7 +55,7 @@ MADR format, sequential numbering, supersession handling, status vocabulary.
 Refuses to silently edit an accepted ADR. Enforces Rule 02 — including the
 requirement to record the consequence the author dislikes.
 
-Output: `docs/src/adrs/NNNN-*.md`.
+Output: `docs/src/dev/adrs/<topic>/NNNN-*.md`.
 
 ## 6. `phase-scribe`
 

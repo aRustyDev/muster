@@ -46,6 +46,6 @@ policy: `.claude/plans/TESTING-STRATEGY.md`.)*
 ## Where to look
 
 Plans and phase records: `.claude/plans/` (start at `PLAN.md`; per-product
-under `{orrery,muster-sdk,muster}/`). Decisions: `docs/src/adrs/` (MADR;
+under `{orrery,muster-sdk,muster}/`). Decisions: `docs/src/dev/adrs/` (MADR;
 ADR-0015 is the open one). Evidence: `evidence/` + RESEARCH docs under
 `.claude/plans/orrery/research/`.
