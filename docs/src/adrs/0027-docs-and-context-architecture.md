@@ -1,6 +1,9 @@
 # 27. Documentation architecture: docs/src taxonomy, ADR relocation, and context-loading strategy
 
-* Status: proposed *(owner review required before CR-2 implements it)*
+* Status: accepted *(2026-08-03, owner review at CR-1 close: the
+  PLAN/ROADMAP amendment in §4 was directed at that review; the
+  @-import deviation, CR-4 deferral, and topic mapping were approved
+  as written)*
 * Date: 2026-08-03
 * Source: context-restructure CR-1
   (`plans/context-restructure/00-analysis.md` — owner target structure of
