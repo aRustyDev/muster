@@ -252,6 +252,36 @@ into QR-2 is not — the synthesis must be reviewable before it rewrites the
 plans corpus (the same reason the phase cadence separates pre-commitment from
 implementation).
 
+### Slice close-out protocol *(added 2026-08-02 — every slice ends with both steps)*
+
+**1. Compaction-ready close.** Nothing load-bearing may live only in the
+conversation. At close: the slice's deliverable is committed; any working
+notes are folded into it or discarded; the persistent project memory
+gains (QR-1) or updates (QR-2/3) a `quality-review-state` entry recording
+which slice closed, the deliverable path, and the two or three facts the
+next slice needs that its deliverable doesn't make obvious (e.g. a
+Stage-A disposition surprising enough to reshape Stage C). Write-as-you-go
+during the slice too, so an *unplanned* mid-session compaction also loses
+nothing — the repo and memory, never the transcript, are the state of
+truth.
+
+**2. Memory-aware kickoff for the next slice.** Rewrite
+`quality-review/NEXT-QR-SESSION.md` with a paste-ready prompt from this
+template; after QR-3 (no next slice) delete the file, mark the state
+memory complete, and record review completion in CARRY-FORWARD:
+
+> You are continuing the Orrery/Muster **quality-strategy review**. Your
+> project memory has `quality-review-state` — trust it for orientation;
+> the repo is the state of truth. Read ONLY
+> `plans/quality-review/00-review-plan.md` (binding: method, acceptance
+> criteria, execution architecture, this protocol) and
+> `<prior deliverable path>`. Do NOT pull the plans corpus into the main
+> context — reading is delegated per the plan's Execution architecture.
+> This session: **QR-<N> (Stages <X>)** — <one-line scope>; deliverable
+> `<path>`. Close per the slice close-out protocol (compaction-ready
+> close + rewrite/retire this file). Conventional Commits;
+> `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
+
 ## Execution architecture *(added 2026-08-02, same day — context-budget amendment)*
 
 Inline execution was estimated at ~450–700k tokens of session context
