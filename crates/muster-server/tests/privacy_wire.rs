@@ -9,6 +9,10 @@
 //! plan-review re-homed that gap to Phase 6a). Until it lands, this test
 //! pins the wire *shape*, which is the structural half of the guarantee;
 //! extend the fixture with real anchors the moment a producer exists.
+//!
+//! (Resolved 2026-08-02, Phase 6a: `build_demo_world` now seeds a real
+//! anchor for Ada via `Command::AddAnchor` — this test runs against a
+//! world WITH anchors, as originally pre-committed.)
 
 use std::collections::BTreeSet;
 use std::sync::{Arc, Mutex};

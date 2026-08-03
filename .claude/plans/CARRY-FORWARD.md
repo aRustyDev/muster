@@ -28,8 +28,8 @@ Columns: origin = doc:line that recorded it · owner = who resolves it now.
 | Item | Origin | Owner status |
 |---|---|---|
 | Coordinator flow: groups/expectations service calls replacing `engine_mut`, inbox + waive | 06-app.md:75 | owned (06-app later slices) |
-| Blast-radius preview UI + honesty gate — **blocked by Phase 6a preview primitive** | 06-app.md:75, muster/SPEC-03:17-21 | owned; engine side → Phase 6a |
-| Privacy tests extend to coordinator-facing DTOs on worlds with anchors | 06-app.md:77 | owned |
+| Blast-radius preview UI + honesty gate — ~~blocked by Phase 6a preview primitive~~ **unblocked 2026-08-02**: `Engine::preview_digests` landed, honesty property already proven engine-side; the slice owes the service call + UI + the muster-level property test | 06-app.md:75, muster/SPEC-03:17-21 | owned |
+| Privacy tests extend to coordinator-facing DTOs on worlds with anchors | 06-app.md:77 | owned — *anchored worlds exist since 2026-08-02 (Phase 6a producer; member-facing fixture already green); the coordinator-facing DTOs are what remain* |
 | `Warn` policy: define observable semantics (likely Detect + notification ChangeSet inclusion) or shrink the enum by ADR; document partial-`Prevent` (2 of 7 kinds) | 03-engine-core.md:218 (expired "Phase 6"); review MO-1 | **re-homed here** |
 | Group-scoped violation query (`inbox(filter)`, "touching G") — repo query vs engine surface vs measured app-side join | muster/SPEC-01:29, SPEC-02:19; review MO-11 | **re-homed here** |
 | Retraction commands beyond `RemoveAttendance` (membership/expectation/hold end-or-shorten) | review CR-6 | **new** |
@@ -42,24 +42,23 @@ Columns: origin = doc:line that recorded it · owner = who resolves it now.
 
 | Item | Origin | Owner status |
 |---|---|---|
-| Capacity/engagement/divergence surfaces + room assignment — **blocked by Phase 6a analytics** | 06-app.md:17, ROADMAP | owned |
+| Capacity/engagement/divergence surfaces + room assignment — ~~blocked by Phase 6a analytics~~ **engine side landed 2026-08-02** (`orrery::analytics`); the slice owes service calls, DTOs, and room assignment | 06-app.md:17, ROADMAP | owned |
 | Notification delivery + `pending_changes()` naming/semantics (read-shaped spec, write-shaped impl) | ROADMAP.md:20, muster/SPEC-02:22; review MO-5/L-9 | **pinned here** (was: no stage home) |
 | "Full track" Beta gate: pre-commit fixture + acceptance criterion at slice entry | review MO-8 | **new** |
 
-## Phase 6a — engine surfaces for the app (new; parallel with Phase 6; orrery work)
+## Phase 6a — engine surfaces for the app ✅ closed 2026-08-02 (phases/06a-engine-surfaces.md)
 
-*Created by review amendment 2026-08-02 (PLAN.md). Own phase doc with
-pre-committed hypotheses required at entry. Sequencing: preview primitive
-before the Muster Alpha slice opens; analytics before the Muster Beta
-slice.*
+*Created by review amendment 2026-08-02 (PLAN.md). All rows resolved in
+the one slice; the Orrery Alpha exit gate is met at 10⁵ (release,
+MemoryRepo — qualifications in the phase doc).*
 
-| Item | Origin | Notes |
+| Item | Origin | Owner status |
 |---|---|---|
-| Non-persisting digest dry-run (expectation/membership overlay → change-set preview equal to post-commit `refresh_digests`) | review CR-2; muster/SPEC-02:18 | the honesty gate is already spec'd (muster/SPEC-03:17-21) |
-| Anchor producer + anchor→first-event feasibility consult (ADR-0014 core feature; `Anchors` has no command and no storage today, so worlds-with-anchors fixtures are impossible — the slice-2 privacy test records this) | 04-travel.md:107 (expired "Phase 5/6"); review MO-4 | *(row added 2026-08-02 during slice-2 implementation — the review re-homed this item but the initial ledger draft omitted the row)* |
-| Analytics surface: engagement, capacity pressure, divergence, bounded 2-hop co-attendance | review CR-4; orrery/SPEC-02:68-73 | 2-hop has a pre-committed budget (<50 ms p95, orrery/SPEC-03:14) |
-| Define the 10⁵ budget set (or restate Orrery Alpha gate at 10⁶) | review CR-4 | Orrery Alpha is unexitable as written |
-| Attendance-model hook (orrery "○ hook" side): make the capacity-interest threshold an injectable strategy | ROADMAP.md:17; review (engine item 7) | SDK impl side stays SDK-owned |
+| Non-persisting digest dry-run (expectation/membership overlay → change-set preview equal to post-commit `refresh_digests`) | review CR-2; muster/SPEC-02:18 | ✅ done — `Engine::preview_digests`, honesty property-tested against the real commit path (subgroup kind included for free); typed `PreviewUnsupported` otherwise |
+| Anchor producer + anchor→first-event feasibility consult (ADR-0014 core feature; `Anchors` has no command and no storage today, so worlds-with-anchors fixtures are impossible — the slice-2 privacy test records this) | 04-travel.md:107 (expired "Phase 5/6"); review MO-4 | ✅ done — `AddAnchor` (Structure-tier enforced) + `anchors_for` + `first_event_feasibility` (verdicts only); demo world now anchored, privacy fixtures real. Sweep-side anchor violations stay a query surface → new Conditional row below |
+| Analytics surface: engagement, capacity pressure, divergence, bounded 2-hop co-attendance | review CR-4; orrery/SPEC-02:68-73 | ✅ done — `analytics` module, all four oracle-tested; 2-hop measured p95 7.4 ms at 10⁵ (release) vs the 50 ms budget |
+| Define the 10⁵ budget set (or restate Orrery Alpha gate at 10⁶) | review CR-4 | ✅ done — SPEC-03 dated addition (same thresholds, ×0.1 dimensions); all seven classes measured green → **Orrery Alpha gate met** |
+| Attendance-model hook (orrery "○ hook" side): make the capacity-interest threshold an injectable strategy | ROADMAP.md:17; review (engine item 7) | ✅ done at primitive level — `capacity_pressure(.., interest_threshold)` caller-supplied; sweep default 0.0 unchanged; richer strategy objects remain SDK-owned |
 
 ## Phase 7 — hardening + ADR-0015 close (the dossier)
 
@@ -107,6 +106,7 @@ list at entry; anything dropped needs a written waiver (Rule 01.2).*
 | Most-constrained-first greedy ordering | room-compatibility constraints arrive | 05-sdk.md:89 |
 | Severity-weight shared constant (engine ↔ SDK) | next engine API touch | 05-sdk.md:159 |
 | Correlation ID per command | operability work (orrery/SPEC-03:54) | review |
+| Sweep-side anchor violations (first/last-event infeasibility as a swept kind) | a `depart_not_before` policy source exists: mobility profiles (ADR-0017) or app-supplied day boundaries | 06a-engine-surfaces.md carry-forward |
 | check-xrefs: also catch hyphenated bare `SPEC-NN` outside product dirs | next script touch | review L-7 |
 
 ## Owner touchpoint queue

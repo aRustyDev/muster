@@ -84,6 +84,9 @@ impl From<OrreryError> for ApiError {
             OrreryError::CommandRejected { .. } => StatusCode::CONFLICT,
             OrreryError::InvalidInterval { .. } => StatusCode::BAD_REQUEST,
             OrreryError::ConstraintViolated { .. } => StatusCode::INTERNAL_SERVER_ERROR,
+            // A caller asked to preview a command kind that has no digest
+            // preview (Phase 6a) — a client-side misuse, not a conflict.
+            OrreryError::PreviewUnsupported { .. } => StatusCode::BAD_REQUEST,
         };
         ApiError(status, e.to_string())
     }

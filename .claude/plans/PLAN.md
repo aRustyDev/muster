@@ -30,7 +30,7 @@ Three hypotheses were refuted during that work. Expect more.
 | **Datastore** | **OPEN — ADR-0015**; funnel: Stage A complete (phases/01a), Stage B complete (phases/01b — no eliminations; all three to Stage C; qualitative findings against grafeo) |
 | Rust graph landscape | surveyed — RESEARCH-0005 Stage A findings + 20 scorecards |
 | Repository trait shape | sync — ADR-0023 |
-| Implementation | Phases 2, 1b, 3, 4, 5 complete; Phase 6 slices 1–2 done — **Muster Prototype met** (member flow, service + HTTP; ADR-0025 crates landed); next: Phase 6a engine surfaces (preview dry-run blocks Muster Alpha) |
+| Implementation | Phases 2, 1b, 3, 4, 5, **6a** complete; Phase 6 slices 1–2 done — **Muster Prototype met**; **Orrery Alpha gate met at 10⁵** (2026-08-02, phases/06a — release/MemoryRepo qualifications recorded); next: Muster Alpha slice (Phase 6 slice 3 — engine side now unblocked) |
 
 ## Phases
 
@@ -135,6 +135,13 @@ Phase 6 the way 1b ran alongside 3–5:
 
 Output: `phases/06a-engine-surfaces.md` (pre-committed at entry, per
 convention).
+
+*Complete 2026-08-02: all four items delivered (preview honesty
+property-tested against the real commit path; analytics oracle-tested;
+10⁵ budget set defined in SPEC-03 and measured green — the Orrery Alpha
+exit gate is met, release/MemoryRepo qualifications in the phase doc;
+anchor producer + consult landed, worlds-with-anchors privacy fixtures
+now real).*
 
 ### Phase 7 — Hardening and the ADR-0015 decision
 Repository implementations for both finalists. Differential testing against

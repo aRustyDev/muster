@@ -11,11 +11,11 @@ use crate::error::{OrreryError, Result};
 use crate::interval::{Interval, Timestamp};
 use crate::model::LocationId;
 use crate::model::{
-    AttendanceSource, Attends, EntityRef, Held, PersonId, Severity, Violation, ViolationId,
-    ViolationKind,
+    AttendanceSource, Attends, EntityRef, Held, MemberOf, PersonId, Severity, SubgroupOf,
+    Violation, ViolationId, ViolationKind,
 };
 use crate::repo::Repository;
-use crate::travel::{self, ClosureReport, ClosureScope};
+use crate::travel::{self, ClosureReport, ClosureScope, Feasibility};
 use crate::{derive, incremental};
 
 use crate::detect::impossible_travel::{self, Placed};
@@ -198,6 +198,79 @@ impl<R: Repository> Engine<R> {
         Ok(out)
     }
 
+    /// ADR-0014's core feature (Phase 6a): can `person` reach their first
+    /// placed event in `window` from one of their anchors, departing no
+    /// earlier than `depart_not_before`? Returns a verdict only —
+    /// durations and provenance, never an anchor or a location
+    /// (Rule 00.6/09; asserted by the `privacy_` tests).
+    ///
+    /// Semantics as pre-committed in phases/06a-engine-surfaces.md: the
+    /// first event is the earliest placed event in `window` starting at or
+    /// after `depart_not_before`; applicable anchors are those valid at
+    /// `depart_not_before` (`applies_when` is stored but unread until
+    /// ADR-0017); the verdict is the best across applicable anchors —
+    /// `Feasible` if any anchor makes it (the don't-accuse rule), else the
+    /// least-bad known route's `Infeasible` (this is a query, not a
+    /// violation: the caller decides whether to accuse), else `Unknown`
+    /// (no anchors, no placed event, or no known route — never an
+    /// accusation). Deliberately NOT wired into `sweep()`: a sweep-side
+    /// anchor violation needs a `depart_not_before` policy source the
+    /// engine doesn't have (mobility profiles, ADR-0017, or app-supplied
+    /// day boundaries — phase-doc carry-forward).
+    pub fn first_event_feasibility(
+        &self,
+        person: PersonId,
+        window: Interval,
+        depart_not_before: Timestamp,
+    ) -> Result<Feasibility> {
+        let placed = self.placed_for(person, window, &[])?;
+        let Some(first) = placed
+            .iter()
+            .filter(|p| p.window.start() >= depart_not_before)
+            .min_by_key(|p| (p.window.start(), p.event))
+        else {
+            return Ok(Feasibility::Unknown);
+        };
+        let gap_s = (first.window.start().micros() - depart_not_before.micros()) / 1_000_000;
+
+        let mut best = Feasibility::Unknown;
+        for anchor in self.repo.anchors_for(person, depart_not_before)? {
+            let verdict = if anchor.structure == first.location {
+                Feasibility::Feasible { slack_s: gap_s }
+            } else {
+                match self.repo.travel_best(anchor.structure, first.location)? {
+                    None => Feasibility::Unknown,
+                    Some(cost) if gap_s >= cost.duration_s => Feasibility::Feasible {
+                        slack_s: gap_s - cost.duration_s,
+                    },
+                    Some(cost) => Feasibility::Infeasible {
+                        deficit_s: cost.duration_s - gap_s,
+                        provenance: cost.provenance,
+                    },
+                }
+            };
+            best = match (best, verdict) {
+                (Feasibility::Feasible { slack_s: a }, Feasibility::Feasible { slack_s: b }) => {
+                    Feasibility::Feasible { slack_s: a.max(b) }
+                }
+                (f @ Feasibility::Feasible { .. }, _) | (_, f @ Feasibility::Feasible { .. }) => f,
+                (
+                    i @ Feasibility::Infeasible { deficit_s: a, .. },
+                    j @ Feasibility::Infeasible { deficit_s: b, .. },
+                ) => {
+                    if b < a {
+                        j
+                    } else {
+                        i
+                    }
+                }
+                (i @ Feasibility::Infeasible { .. }, Feasibility::Unknown) => i,
+                (Feasibility::Unknown, v) => v,
+            };
+        }
+        Ok(best)
+    }
+
     /// Incremental digest for one person at `at` (salsa-memoized).
     pub fn digest(&mut self, person: PersonId, at: Timestamp) -> [u8; 32] {
         *incremental::digest(&self.db, self.world, person, at.micros())
@@ -225,6 +298,141 @@ impl<R: Repository> Engine<R> {
             }
         }
         Ok(changed)
+    }
+
+    /// Non-persisting digest dry-run (Phase 6a): the change set that
+    /// `apply(cmd)` followed by `refresh_digests(at)` WOULD produce,
+    /// without writing anything — the blast-radius preview primitive
+    /// (muster/SPEC-03 honesty gate: preview must equal the post-commit
+    /// change set, property-tested in `tests/preview.rs`).
+    ///
+    /// Supported for exactly the three mirrored fact classes; any other
+    /// kind gets [`OrreryError::PreviewUnsupported`]. The overlay is built
+    /// from repository reads plus the command's would-be fact — the same
+    /// mapping `incremental::refresh_after` applies post-commit.
+    ///
+    /// Mirror discipline (plan-review CR-1): every fallible read completes
+    /// before the salsa input is overlaid, and no fallible operation exists
+    /// between overlay and restore — no path leaves the mirror corrupted.
+    /// The digest chain itself cannot fail or panic (pure computation over
+    /// the mirrored vectors). Restoring bumps the revision again; salsa
+    /// backdates unaffected persons at the extraction layer both times, so
+    /// preview cost stays bounded by the blast radius, not the population.
+    pub fn preview_digests(&mut self, cmd: &Command, at: Timestamp) -> Result<Vec<PersonId>> {
+        enum Overlay {
+            Memberships(Vec<MemberOf>),
+            Subgroups(Vec<SubgroupOf>),
+            ExpectKeys(Vec<incremental::ExpectKey>),
+        }
+        let overlay = match cmd {
+            Command::AddMembership {
+                person,
+                group,
+                during,
+                role,
+            } => {
+                let mut v = self.repo.memberships_all()?;
+                v.push(MemberOf {
+                    person: *person,
+                    group: *group,
+                    during: *during,
+                    role: role.clone(),
+                });
+                Overlay::Memberships(v)
+            }
+            Command::AddSubgroup {
+                child,
+                parent,
+                during,
+            } => {
+                let mut v = self.repo.subgroups_all()?;
+                v.push(SubgroupOf {
+                    child: *child,
+                    parent: *parent,
+                    during: *during,
+                });
+                Overlay::Subgroups(v)
+            }
+            Command::AddExpectation {
+                group,
+                event,
+                default_priority,
+                during,
+                cascades,
+                ..
+            } => {
+                let (_, _, mut keys) = incremental::mirror_from(&self.repo)?;
+                keys.push(incremental::ExpectKey {
+                    group: *group,
+                    event: *event,
+                    valid_from: during.start(),
+                    valid_to_excl: during.end(),
+                    cascades: *cascades,
+                    priority_key: incremental::priority_key(*default_priority),
+                });
+                Overlay::ExpectKeys(keys)
+            }
+            other => {
+                return Err(OrreryError::PreviewUnsupported { kind: other.kind() });
+            }
+        };
+
+        // Remaining fallible reads, completed before the mirror is touched:
+        // the person set and their stored digest records — the same
+        // comparison base `refresh_digests` uses.
+        let mut stored: Vec<(PersonId, Option<[u8; 32]>)> = Vec::new();
+        for pid in self.repo.persons()? {
+            stored.push((
+                pid,
+                self.repo
+                    .person(pid)?
+                    .and_then(|p| p.derived_digest.map(|d| d.digest)),
+            ));
+        }
+
+        let _span = tracing::info_span!("derive.preview_digests", kind = cmd.kind()).entered();
+
+        // Overlay → compute → restore. Infallible section: no `?` between
+        // the set and the restore (CR-1).
+        use salsa::Setter;
+        let changed = match overlay {
+            Overlay::Memberships(v) => {
+                let saved = self.world.set_memberships(&mut self.db).to(v);
+                let changed = Self::digest_changes(&self.db, self.world, &stored, at);
+                self.world.set_memberships(&mut self.db).to(saved);
+                changed
+            }
+            Overlay::Subgroups(v) => {
+                let saved = self.world.set_subgroups(&mut self.db).to(v);
+                let changed = Self::digest_changes(&self.db, self.world, &stored, at);
+                self.world.set_subgroups(&mut self.db).to(saved);
+                changed
+            }
+            Overlay::ExpectKeys(v) => {
+                let saved = self.world.set_expect_keys(&mut self.db).to(v);
+                let changed = Self::digest_changes(&self.db, self.world, &stored, at);
+                self.world.set_expect_keys(&mut self.db).to(saved);
+                changed
+            }
+        };
+        Ok(changed)
+    }
+
+    /// Persons whose fresh digest differs from their stored record —
+    /// `refresh_digests`'s comparison, minus the persistence.
+    fn digest_changes(
+        db: &salsa::DatabaseImpl,
+        world: incremental::World,
+        stored: &[(PersonId, Option<[u8; 32]>)],
+        at: Timestamp,
+    ) -> Vec<PersonId> {
+        stored
+            .iter()
+            .filter_map(|(pid, s)| {
+                let fresh = *incremental::digest(db, world, *pid, at.micros());
+                (*s != Some(fresh)).then_some(*pid)
+            })
+            .collect()
     }
 
     /// Batch sweep (PRD Flow B): run the repo-data detectors over the whole

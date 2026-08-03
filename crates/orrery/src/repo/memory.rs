@@ -26,9 +26,9 @@ use crate::command::{Command, CommandReceipt};
 use crate::error::{OrreryError, Result};
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    AttendanceSource, Attends, ClosureEntry, EntityRef, Event, EventId, Expects, Group, GroupId,
-    Held, Location, LocationId, MemberOf, Mode, Person, PersonId, Posture, SubgroupOf, TravelCost,
-    Traverse, Violation, ViolationId, Within,
+    Anchors, AttendanceSource, Attends, ClosureEntry, EntityRef, Event, EventId, Expects, Group,
+    GroupId, Held, Location, LocationId, MemberOf, Mode, Person, PersonId, Posture, SubgroupOf,
+    Tier, TravelCost, Traverse, Violation, ViolationId, Within,
 };
 use crate::repo::{Repository, MAX_GROUP_DEPTH};
 use crate::tier;
@@ -52,6 +52,7 @@ struct State {
     within: Vec<Within>,
     closure: Vec<ClosureEntry>,
     violations: HashMap<ViolationId, Violation>,
+    anchors: Vec<Anchors>,
 }
 
 #[derive(Default)]
@@ -221,6 +222,17 @@ impl Repository for MemoryRepo {
             .member_of
             .iter()
             .filter(|m| m.person == id && m.during.contains_point(at))
+            .cloned()
+            .collect())
+    }
+
+    fn anchors_for(&self, id: PersonId, at: Timestamp) -> Result<Vec<Anchors>> {
+        let _s = tracing::info_span!("repo.anchors_for", backend = "memory").entered();
+        Ok(self
+            .read()?
+            .anchors
+            .iter()
+            .filter(|a| a.person == id && a.during.contains_point(at))
             .cloned()
             .collect())
     }
@@ -503,6 +515,24 @@ impl Repository for MemoryRepo {
                 state.traverse.push(t);
                 state.traverse.push(reverse);
             }
+            Command::AddAnchor(a) => {
+                if !state.persons.contains_key(&a.person) {
+                    return Err(OrreryError::NotFound(EntityRef::Person(a.person)));
+                }
+                let loc = state
+                    .locations
+                    .get(&a.structure)
+                    .ok_or(OrreryError::NotFound(EntityRef::Location(a.structure)))?;
+                if loc.tier != Tier::Structure {
+                    return Err(OrreryError::CommandRejected {
+                        reason: format!(
+                            "anchors attach to Structure-tier locations (ADR-0014): got {:?}",
+                            loc.tier
+                        ),
+                    });
+                }
+                state.anchors.push(a);
+            }
             Command::WaiveViolation { id, by, reason } => {
                 let v = state
                     .violations
@@ -778,6 +808,72 @@ mod tests {
             })
             .unwrap_err();
         assert!(matches!(err, OrreryError::NotFound(_)), "{err:?}");
+    }
+
+    /// ADR-0014 producer (Phase 6a): Structure-tier targets only; unknown
+    /// person/location are NotFound; `anchors_for` is entity-partitioned
+    /// with a constant instant.
+    #[test]
+    fn add_anchor_validates_tier_and_anchors_for_filters() {
+        let repo = MemoryRepo::new();
+        let p = person("ada");
+        let pid = p.id;
+        let home = Location {
+            id: LocationId::new(),
+            name: "home".into(),
+            tier: Tier::Structure,
+            portal: crate::model::Portal::None,
+            capacity: None,
+            ext: Default::default(),
+        };
+        let home_id = home.id;
+        let r = room("r");
+        let rid = r.id;
+        repo.apply(Command::UpsertPerson(p)).unwrap();
+        repo.apply(Command::UpsertLocation(home)).unwrap();
+        repo.apply(Command::UpsertLocation(r)).unwrap();
+
+        let anchor = |structure| Anchors {
+            person: pid,
+            structure,
+            label: "home".into(),
+            during: iv(0, 100),
+            applies_when: None,
+        };
+
+        // Room-tier target: rejected, naming the ADR.
+        let err = repo.apply(Command::AddAnchor(anchor(rid))).unwrap_err();
+        match err {
+            OrreryError::CommandRejected { reason } => {
+                assert!(reason.contains("ADR-0014"), "{reason}");
+            }
+            other => panic!("expected CommandRejected, got {other:?}"),
+        }
+        // Unknown location / person: NotFound.
+        assert!(matches!(
+            repo.apply(Command::AddAnchor(anchor(LocationId::new()))),
+            Err(OrreryError::NotFound(_))
+        ));
+        assert!(matches!(
+            repo.apply(Command::AddAnchor(Anchors {
+                person: PersonId::new(),
+                ..anchor(home_id)
+            })),
+            Err(OrreryError::NotFound(_))
+        ));
+
+        repo.apply(Command::AddAnchor(anchor(home_id))).unwrap();
+        assert_eq!(repo.anchors_for(pid, ts(50)).unwrap().len(), 1);
+        assert!(
+            repo.anchors_for(pid, ts(150)).unwrap().is_empty(),
+            "expired anchor must not apply"
+        );
+        assert!(
+            repo.anchors_for(PersonId::new(), ts(50))
+                .unwrap()
+                .is_empty(),
+            "partitioned by person"
+        );
     }
 
     fn room(name: &str) -> Location {

@@ -21,6 +21,17 @@ pub enum OrreryError {
 
     #[error("command rejected: {reason}")]
     CommandRejected { reason: String },
+
+    /// A digest preview was requested for a command kind that does not
+    /// touch the mirrored derivation inputs (memberships / subgroups /
+    /// expectations). A typed refusal beats a possibly-lying change set:
+    /// e.g. an entity upsert changes the person set itself, which an
+    /// overlay cannot represent honestly (Phase 6a).
+    #[error(
+        "no digest preview for command kind `{kind}`: only membership, \
+         subgroup, and expectation commands have one"
+    )]
+    PreviewUnsupported { kind: &'static str },
 }
 
 impl OrreryError {
