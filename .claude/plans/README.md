@@ -20,6 +20,15 @@ dependencies on the other two. The full boundary matrix stays at the root.
 **Rule: any fact appearing in both a root and a per-product document is a fact
 that will drift.** Link instead.
 
+## quality-review/ *(added 2026-08-02)*
+
+`quality-review/00-review-plan.md` is the pre-committed plan for the
+cross-product quality-strategy review (testing / benchmarking / profiling /
+validation / telemetry coverage of every crate). Its execution deliverables
+(gap matrix, synthesis) land in the same directory; the durable cross-crate
+strategy it produces will live at `plans/TESTING-STRATEGY.md`, per-crate
+criteria in each product's testing spec.
+
 ## Numbering
 
 Question, research, ADR, and phase numbers are **global**, not per-directory.
