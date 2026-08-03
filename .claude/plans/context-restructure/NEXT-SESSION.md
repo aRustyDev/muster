@@ -7,9 +7,11 @@ file when the restructure lands.*
 
 **GATE: CR-2 is blocked on owner review.** ADR-0027 (`docs/src/adrs/
 0027-docs-and-context-architecture.md`, status `proposed`) and
-`01-plan.md` §2's owner queue must be reviewed first — especially the
-@-import deviation, the PLAN/ROADMAP move, the CR-4 deferral, and the
-ADR topic assignments. If the owner has not approved, stop and ask.
+`01-plan.md` §2's owner queue must be reviewed first — the @-import
+deviation, the CR-4 deferral, and the ADR topic assignments (the
+PLAN/ROADMAP question was resolved 2026-08-03: they stay in plans/;
+`dev/roadmaps/` is for cross-plan summaries only). If the owner has
+not approved, stop and ask.
 
 You are executing **CR-2 — migrate + land** of the context/docs
 restructure. Project memory `context-restructure-state` orients you;

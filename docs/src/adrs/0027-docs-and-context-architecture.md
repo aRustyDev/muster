@@ -103,9 +103,14 @@ fixes the context-file split. This ADR is that change record for both.
    `.claude/plans/` holds the working corpus (phase docs, specs, PRDs,
    questions, research, and session machinery: CARRY-FORWARD,
    NEXT-SESSION, kickoffs, quality-review records). Migration set, in
-   full: TESTING-STRATEGY.md (pilot ×4 decomposition), GLOSSARY.md,
-   PLAN.md and ROADMAP.md → `dev/roadmaps/` (per-product derivations
-   stay in plans/). Specs and PRDs are explicitly out of scope.
+   full: TESTING-STRATEGY.md (pilot ×4 decomposition) and GLOSSARY.md.
+   PLAN.md and ROADMAP.md **stay in plans/** *(owner ruling 2026-08-03,
+   amending this ADR's first draft)*: they are plan-specific
+   documentation, not persistent reference. `dev/roadmaps/` is reserved
+   for **cross-plan summarizing roadmaps** — documents that keep
+   independently-progressing plans aware of shared features and
+   dependencies — created on first need. Specs and PRDs are explicitly
+   out of scope.
    Decomposing rule *content* (e.g. Rule 05's span tables) into
    `policies/telemetry/` is **deferred** to a follow-up slice —
    recorded so the "narrow and sharp" end-state stays owed.

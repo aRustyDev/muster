@@ -43,9 +43,9 @@ Full reports in the CR-1 session record; load-bearing findings:
 | T10 governance | ADR-0027 written first, `proposed`; CR-2 blocked on owner review |
 
 **Owner queue (decide at ADR-0027 review, before CR-2):**
-1. ADR-0027 overall — especially the **@-import deviation** (§5) and the
-   **PLAN.md/ROADMAP.md move** to `docs/src/dev/roadmaps/` (changes the
-   read-order list in `.claude/CLAUDE.md` and long muscle memory).
+1. ADR-0027 overall — especially the **@-import deviation** (§5).
+   ~~The PLAN.md/ROADMAP.md move~~ — **resolved 2026-08-03**: they stay
+   in plans/ (see §4 amendment).
 2. The CR-4 deferral of rule-content decomposition (Rule 05 span tables
    etc.) — accept, or pull into CR-2 (doubles W3 blast radius; not
    recommended).
@@ -75,8 +75,15 @@ Filenames unchanged (`NNNN-kebab-title.md`). 12+3+3+5+1+1+2 = 27 ✓.
 |---|---|---|---|
 | TESTING-STRATEGY.md | ×4 decomposition (pilot, §5) | `dev/strategies/testing/`, `dev/policies/testing/`, `dev/policies/benchmarking/`, `dev/patterns/testing/` | 38 lines / 16 files |
 | GLOSSARY.md | move | `dev/glossary.md` | 1 file |
-| PLAN.md | move | `dev/roadmaps/plan.md` | 19 files name `PLAN.md` (most are per-product derivations/historical — living-doc sweep only) |
-| ROADMAP.md | move | `dev/roadmaps/roadmap.md` | 13 files (same caveat) |
+
+*(Amended 2026-08-03 at CR-1 review — owner ruling, Rule 01.2: the
+original inventory also moved PLAN.md and ROADMAP.md to
+`dev/roadmaps/`. **They stay in `.claude/plans/**`** — they are
+plan-specific documentation, not persistent reference.
+`docs/src/dev/roadmaps/` is reserved for **cross-plan summarizing
+roadmaps** — documents that keep independently-progressing plans aware
+of shared features and dependencies — created on first need; nothing
+moves there in CR-2.)*
 
 Plus the ADR corpus per §3 (`docs/src/adrs/*` path refs: 9 md files,
 `check-xrefs.sh:20`, `docs/justfile:19`, `.claude/agents/adr-author.md`).
@@ -177,15 +184,18 @@ Branch `feat/cr2-docs-restructure`, merged `--no-ff` when §8 is green
 1. `just audit`, `just docs::build`, `just docs::check-links` green
    after **every** landing commit; zero dangling `ADR-NNNN`.
 2. Sweep check: `grep -rn 'docs/src/adrs/' --include='*.md'` (and
-   `plans/TESTING-STRATEGY\|plans/GLOSSARY\|plans/PLAN.md\|plans/ROADMAP.md`)
-   returns hits only in historical records (phase docs, quality-review,
-   artifacts) and the plans/README map — zero in living docs, rules,
-   agents, tooling.
+   `plans/TESTING-STRATEGY\|plans/GLOSSARY`) returns hits only in
+   historical records (phase docs, quality-review, artifacts) and the
+   plans/README map — zero in living docs, rules, agents, tooling.
 3. Context budget: at-launch unconditional auto-load ≤ **404 lines**
    (2026-08-03 baseline: rules 345 + `.claude/CLAUDE.md` 47 + root 12);
    expected ≈350 after scoping 04/05 (−97) and W1 additions (≤+30) +
    README pointer lines. Any excess over baseline needs a written
-   reason in the CR-2 close note.
+   reason in the CR-2 close note. *(Token cross-check, measured
+   2026-08-03 via `/context`: project auto-load ≈ **7.6k tokens** —
+   root CLAUDE.md 283 + `.claude/CLAUDE.md` 677 + rules ≈6.6k; Rules
+   04+05 ≈ 1.8k tokens are what `paths:` scoping removes from non-Rust
+   sessions.)*
 4. Rule 02 held: ADR-0027 precedes implementation; numbering global,
    sequential; no accepted ADR content-edited (moves ≠ edits).
 5. All six TODO markers in `.claude/CLAUDE.md` resolved — filled or

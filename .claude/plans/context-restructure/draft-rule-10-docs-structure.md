@@ -26,7 +26,7 @@ paths:
 | what we're trying to achieve, in what order | `docs/src/dev/strategies/<topic>/` | evolves by dated amendment |
 | what is enforced (MUST/SHOULD + its gate) | `docs/src/dev/policies/<topic>/` | names the gate command; executable where possible |
 | how to do X here, with an example | `docs/src/dev/patterns/<topic>/` | advisory, never binding |
-| phases, stage gates, sequencing | `docs/src/dev/roadmaps/` | living; per-product derivations stay in plans/ |
+| cross-plan roadmap summaries (shared features, dependencies between plans) | `docs/src/dev/roadmaps/` | living; plan-specific PLAN/ROADMAP stay in `.claude/plans/**` |
 | a defined term | `docs/src/dev/glossary.md` | — |
 
 If a statement fits two classes it lives in the **more binding** one and
