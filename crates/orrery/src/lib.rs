@@ -16,6 +16,7 @@
 //!    type in this crate's public API.
 //! 5. All mutations through [`command::Command`].
 
+pub mod analytics;
 pub mod command;
 pub mod derive;
 pub mod detect;
