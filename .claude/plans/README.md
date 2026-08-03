@@ -27,10 +27,11 @@ cross-product quality-strategy review (testing / benchmarking / profiling /
 validation / telemetry coverage of every crate). Executed 2026-08-02/03:
 `01-gap-matrix.md` (Stage A+B evidence), `02-additions-and-order.md`
 (Stage C+D synthesis — RR&P stages, ordering, semver), `03-qf-slice.md`
-(the QF implementation slice). The durable cross-crate strategy lives at
-`plans/TESTING-STRATEGY.md` (single home, Rule 07); per-crate criteria in
-each product's testing spec; the accepted-items ledger in
-`CARRY-FORWARD.md`; tool adoptions in ADR-0026.
+(the QF implementation slice). The durable cross-crate strategy lived at
+`plans/TESTING-STRATEGY.md` until 2026-08-03, when ADR-0027 decomposed it
+into `docs/src/dev/` (map below); per-crate criteria in each product's
+testing spec; the accepted-items ledger in `CARRY-FORWARD.md`; tool
+adoptions in ADR-0026.
 
 ## Numbering
 

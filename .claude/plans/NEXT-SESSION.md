@@ -30,7 +30,8 @@ testing specs, dated 2026-08-03) — and closes **RR&P-7** (wire-input
 validation: library or hand-rolled `TryFrom`) and **RR&P-8** (UI testing
 approach + a11y floor) *in* the pre-commitment, one slice ahead of their
 implement items (rule D5, minimum spacing). See CARRY-FORWARD "Quality
-strategy — accepted items" and `plans/TESTING-STRATEGY.md`.
+strategy — accepted items" and the testing strategy/policies under
+`docs/src/dev/` (decomposed 2026-08-03, ADR-0027).
 
 **The slice: Muster Alpha (06-app.md slice 3) — coordinator flow.**
 ROADMAP gate: **"groups, expectations, blast-radius preview, violation

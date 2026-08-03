@@ -33,3 +33,18 @@
 - [25. Frontend structure: muster-server (axum) + muster-ui (dioxus) + muster-types](dev/adrs/architecture/0025-frontend-structure.md)
 - [26. Quality tooling baseline: cargo-deny, cargo-hack, and the profiling door](dev/adrs/testing/0026-quality-tooling-baseline.md)
 - [27. Documentation architecture: docs/src taxonomy, ADR relocation, and context-loading strategy](dev/adrs/project/0027-docs-and-context-architecture.md)
+
+# Strategies
+
+- [Testing strategy: the coverage taxonomy](dev/strategies/testing/coverage-taxonomy.md)
+- [Testing strategy: tool roster and open decisions](dev/strategies/testing/tool-roster.md)
+
+# Policies
+
+- [Benchmarking policy: measurement variance (W-2)](dev/policies/benchmarking/measurement-variance.md)
+- [Testing policy: properties and regressions](dev/policies/testing/property-and-regression.md)
+- [Testing policy: standing gates](dev/policies/testing/standing-policies.md)
+
+# Patterns
+
+- [Testing pattern: test doubles — placement and strategy (T-4, C8)](dev/patterns/testing/test-doubles.md)

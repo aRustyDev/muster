@@ -58,7 +58,7 @@ Generated worlds must deliberately contain:
 The expired mid-chain edge is the critical one: it is what distinguishes true
 per-hop temporal filtering from whole-path post-filtering.
 
-## Quality-review additions (2026-08-03, QR-3 — items resolve in `plans/quality-review/02-additions-and-order.md`; cross-crate policy in `plans/TESTING-STRATEGY.md`)
+## Quality-review additions (2026-08-03, QR-3 — items resolve in `plans/quality-review/02-additions-and-order.md`; cross-crate policy in `docs/src/dev/policies/testing/`)
 
 * **Privacy: log and error channels (O-1, F-4 a — owner: Muster-Alpha
   entry).** The `privacy_` family extends beyond payloads: a capturing

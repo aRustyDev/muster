@@ -24,5 +24,6 @@ definitions, UI, delivery. Two executable gates:
 Testing: `just muster_sdk::test`; `test-optimality` (`optimality_`
 prefix: greedy ⇔ brute force ⇔ max-overlap ≤ k, n ≤ 12);
 `test-monotone` (`monotone_`: local search never worse than its seed).
-New property tests take the `prop_` prefix (TESTING-STRATEGY naming
-policy). Criteria: `.claude/plans/muster-sdk/specs/03-testing-criteria.md`.
+New property tests take the `prop_` prefix (naming policy:
+`docs/src/dev/policies/testing/property-and-regression.md`).
+Criteria: `.claude/plans/muster-sdk/specs/03-testing-criteria.md`.

@@ -31,4 +31,4 @@ Conventions that differ from the libraries:
 
 Testing: `just muster::test`, `just muster::e2e` (e2e_ family). Criteria:
 `.claude/plans/muster/specs/03-testing-criteria.md`; cross-crate policy:
-`.claude/plans/TESTING-STRATEGY.md`.
+`docs/src/dev/policies/testing/` (ADR-0027).

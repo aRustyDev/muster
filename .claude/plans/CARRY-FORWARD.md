@@ -97,7 +97,7 @@ list at entry; anything dropped needs a written waiver (Rule 01.2).*
 | Orrery Beta | API-freeze definition + diff tooling (cargo-public-api absent on this host — grep fallback is not an API-diff) | 02-workspace.md:126; review (gate check) |
 | Orrery RC | docs-complete inventory | orrery/SPEC-05:60 |
 
-## Quality strategy — accepted items *(added 2026-08-03; the quality-strategy review's ledger. Full definitions: `quality-review/02-additions-and-order.md`; policy home: `TESTING-STRATEGY.md`. Review complete: QR-1 → QR-2 → QF slice → QR-3 all closed 2026-08-03.)*
+## Quality strategy — accepted items *(added 2026-08-03; the quality-strategy review's ledger. Full definitions: `quality-review/02-additions-and-order.md`; policy home: `docs/src/dev/` testing strategy/policies — decomposed from TESTING-STRATEGY.md 2026-08-03, ADR-0027, map in plans/README. Review complete: QR-1 → QR-2 → QF slice → QR-3 all closed 2026-08-03.)*
 
 ### RR&P stages (review-research-plan; each closes with a written pick)
 
@@ -122,7 +122,7 @@ list at entry; anything dropped needs a written waiver (Rule 01.2).*
 | O-3 memory-growth harness (dependency-free `GlobalAlloc` counter — R-10) | Orrery-Beta prep |
 | O-4 rustdoc examples on the public API | Orrery Beta (freeze) |
 | O-2 e2e span/payload privacy sweep (F-4 f) | RC pre-commitment |
-| M-8 Parquet/CSV egress test, anchors excluded by default | RC pre-commitment (posture: TESTING-STRATEGY) |
+| M-8 Parquet/CSV egress test, anchors excluded by default | RC pre-commitment (posture: `docs/src/dev/policies/testing/standing-policies.md`) |
 | SDK-1's serialized-determinism test (where suggestions first cross a wire) | Muster Alpha (muster-server) |
 | SDK-4 span-attribute alignment (`sdk.batch` attributes per the Rule 05 table) | Muster Alpha |
 | SDK-5 churn/stress scale definition | Muster-Beta pre-commitment |
