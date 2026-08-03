@@ -14,9 +14,10 @@ e2e:
 run:
     cargo run -p muster
 
-# development: stdout exporter, no collector required (Rule 05)
-run-dev:
-    ORRERY_OTEL_EXPORTER=stdout cargo run -p muster
+# (run-dev removed 2026-08-03, QF slice / QR-2 M-7, F-9: its
+# ORRERY_OTEL_EXPORTER knob was dead — this crate has no tracing or
+# figment dependency. The live twin is `just muster_server::run-dev`;
+# subscriber ownership is corrected in Rule 05 by the QR-3 amendment.)
 
 lint:
     cargo clippy -p muster --all-targets --all-features -- -D warnings

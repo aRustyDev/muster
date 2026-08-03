@@ -6,24 +6,34 @@ default:
 test:
     cargo nextest run -p orrery --all-features
 
-# detectors must ship with their brute-force oracle (Rule 03 / agent 3)
+# detectors must ship with their brute-force oracle (Rule 03 / agent 3).
+# (fixed 2026-08-03, QF slice / QR-2 W-1: the old recipe passed a
+# `proptest` feature that never existed and filtered on `detect_`, which
+# matched zero tests. The oracle-equality families are named
+# `prop_matches_oracle` / `prop_matches_naive` / `oracle_*`.)
 test-detectors:
-    cargo nextest run -p orrery --features proptest -E 'test(detect_)'
+    cargo nextest run -p orrery -E 'test(matches_) | test(oracle_)'
 
-# derived state must equal a cold recompute after arbitrary mutation sequences
+# derived state must equal a cold recompute after arbitrary mutation
+# sequences (feature flag removed 2026-08-03 — same W-1 fix as above)
 test-incremental:
-    cargo nextest run -p orrery --features proptest -E 'test(incremental_)'
+    cargo nextest run -p orrery -E 'test(incremental_)'
 
 # anchor coordinates must never cross the coordinator boundary (Rule 00.6)
 test-privacy:
     cargo nextest run -p orrery -E 'test(privacy_)'
 
+# no bench targets exist yet (QR-2 W-1/F-1): fail loudly, don't succeed
+# over zero benchmarks. The harness — including the seven canonical
+# queries at 1e3/1e5/1e6 that SPEC-05 promises — arrives with RR&P-2.
 bench:
-    cargo bench -p orrery
+    @echo "ERROR: orrery has no bench targets yet — see RR&P-2" >&2
+    @exit 1
 
-# the seven canonical queries at 1e3 / 1e5 / 1e6
 bench-canonical:
-    cargo bench -p orrery --bench canonical
+    @echo "ERROR: the canonical-queries bench does not exist yet — see RR&P-2" >&2
+    @echo "       (plans/quality-review/02-additions-and-order.md)" >&2
+    @exit 1
 
 lint:
     cargo clippy -p orrery --all-targets --all-features -- -D warnings
@@ -35,10 +45,15 @@ check-seam:
     #!/usr/bin/env bash
     set -euo pipefail
     PAT='sqlite|ladybug|kuzu|cozo|grafeo|agdb|rusqlite'
+    # Which arm ran is part of the gate's provenance (QR-2 W-15/F-8): the
+    # grep fallback is line-anchored and weaker than the rustdoc arm —
+    # phase docs must record which one produced "seam clean".
     if command -v rustup >/dev/null 2>&1; then
+      ARM="public-api"
       OUT=$(cargo public-api -p orrery --simplified | grep -Ei "$PAT" || true)
     else
+      ARM="grep-fallback (line-anchored; misses re-exports and multi-line signatures)"
       OUT=$(grep -rhiE "^\s*pub .*($PAT)" src/ || true)
     fi
     if [ -n "$OUT" ]; then echo "SEAM VIOLATION: datastore type in public API"; echo "$OUT"; exit 1; fi
-    echo "seam clean"
+    echo "seam clean (arm: $ARM)"
