@@ -1,31 +1,32 @@
-# Next QR session — QR-1 (Stages A+B)
+# Next QR session — QR-2 (Stages C+D)
 
-*Seeded 2026-08-02 with the review plan; rewritten at each slice close
-per the plan's slice close-out protocol. Paste the prompt below into a
-fresh session in this repo.*
+*Rewritten 2026-08-03 at QR-1 close per the slice close-out protocol.
+Paste the prompt below into a fresh session in this repo.*
 
 ---
 
-You are starting execution of the Orrery/Muster **quality-strategy
-review**. No `quality-review-state` memory exists yet — you will create
-it at close; the repo is the state of truth. Read ONLY
-`plans/quality-review/00-review-plan.md` (binding: taxonomy, method,
-acceptance criteria, execution architecture, slice close-out protocol).
-Do NOT pull the plans corpus into the main context — Stage-A reading is
-delegated: fan out the four reader subagents (orrery · muster family ·
-muster-sdk · cross-cutting) with the dimension taxonomy and disposition
-vocabulary, then run the completeness critics, then do ALL Stage-B
-tiering yourself in the main loop.
+You are continuing the Orrery/Muster **quality-strategy review**. Your
+project memory has `quality-review-state` — trust it for orientation;
+the repo is the state of truth. Read ONLY
+`plans/quality-review/00-review-plan.md` (binding: method, acceptance
+criteria, execution architecture, this protocol) and
+`plans/quality-review/01-gap-matrix.md` (QR-1's deliverable: the
+280-cell matrix, findings F-1..F-19 with disposition lines, and the
+closing self-check section that pre-sorts findings into Stage-C
+buckets). Do NOT pull the plans corpus into the main context — reading
+is delegated per the plan's Execution architecture: fan out
+web-verification subagents for the Appendix seed triage (~25–30
+crate-shaped seeds, Rule 06 maintenance bar, verdict rows only); do ALL
+synthesis, ordering (rules D1–D5), and semver mapping inline.
 
-This session: **QR-1 (Stages A+B)** — the 36×7 gap matrix with cited
-dispositions plus tiered robustness findings, refutations-first;
-deliverable `plans/quality-review/01-gap-matrix.md`. The plan's
-"inventory observations already in hand" section seeds Stage A — verify
-them, don't re-derive them.
-
-Close per the slice close-out protocol: commit the deliverable; create
-the `quality-review-state` project memory (slice closed, deliverable
-path, the facts QR-2 needs that the matrix doesn't make obvious);
-rewrite this file for QR-2 (Stages C+D, deliverable
-`02-additions-and-order.md`). Conventional Commits;
+This session: **QR-2 (Stages C+D)** — per-crate 'to add' lists
+(implement-now / RR&P / reject-with-reason), full seed triage, the
+dependency-honest ordering, and the soft semver mapping; deliverable
+`plans/quality-review/02-additions-and-order.md`. Owner touchpoints to
+queue, not block on: CI platform (GitHub Actions is an inference),
+Muster-Alpha sequencing, human-protocol appetite. Also decide the two
+review-added taxonomy candidates (privacy testing; ops-validation/DR).
+Close per the slice close-out protocol (compaction-ready close: commit,
+update `quality-review-state`, rewrite this file for QR-3).
+Conventional Commits;
 `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
