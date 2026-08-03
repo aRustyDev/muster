@@ -17,7 +17,8 @@ EXCLUDES=( ! -path './.git/*' ! -path './orrery-handoff/*' ! -path '*/_work/*' \
            ! -path '*/__pycache__/*' ! -path './target/*' ! -name '.DS_Store' )
 
 echo "-- dangling numeric references --"
-adrs=$(ls docs/src/adrs/*.md 2>/dev/null | sed 's|.*/||;s/-.*//' | sort -u)
+# recursive: ADRs nest under docs/src/dev/adrs/<topic>/ (ADR-0027)
+adrs=$(find docs/src/adrs docs/src/dev/adrs -name '*.md' 2>/dev/null | sed 's|.*/||;s/-.*//' | grep -E '^[0-9]{4}$' | sort -u)
 qs=$(find .claude/plans -path '*questions/[0-9]*.md' | sed 's|.*/||;s/-.*//' | sort -u)
 rs=$(find .claude/plans -path '*research/[0-9]*.md' | sed 's|.*/||;s/-.*//' | sort -u)
 for kind in ADR:"$adrs" QUESTION:"$qs" RESEARCH:"$rs"; do
