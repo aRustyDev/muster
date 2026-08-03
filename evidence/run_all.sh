@@ -5,7 +5,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export ORRERY_WORK="${ORRERY_WORK:-$(pwd)/evidence/_work}"
 
-echo "== install ==";            pip install ladybug --break-system-packages -q
+# ladybug pinned 2026-08-03 (QF slice / QR-2 W-2, F-5): 0.19.0 is the
+# version phases/00-grounding.md records for every RESEARCH figure —
+# unpinned installs made "reproduce within run-to-run noise" unfalsifiable
+# across ladybug releases.
+echo "== install ==";            pip install 'ladybug==0.19.0' --break-system-packages -q
 echo "== probe 1: stop-gate ==   (~10s)";  python3 evidence/probe_01_recursive.py
 echo "== spike S ==              (~5s)";   python3 evidence/orrery_spike.py S
 echo "== spike M ==              (~30s)";  python3 evidence/orrery_spike.py M
