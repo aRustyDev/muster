@@ -33,7 +33,9 @@ This session: **CR-1 — research, decisions, pre-committed plan.**
   (b) current best practices for SKILLS (progressive disclosure,
   frontmatter, scripts, schemas) and CUSTOM AGENTS (description
   optimization, model/tool/permission definition) — W4/W5;
-  (c) mdbook SUMMARY automation options — T6.
+  (c) mdbook SUMMARY automation options — T6;
+  (d) current Claude Code **hook events** — especially any
+  compaction-adjacent event — for W6's mechanical trigger.
 * **Decide** T2 (ADR relocation: leaning = keep global numbers, nest by
   topic, update tooling), T3 (the four boundary definitions), T5 (the
   migration inventory; scope creep is the failure mode — specs/PRDs
@@ -45,6 +47,13 @@ This session: **CR-1 — research, decisions, pre-committed plan.**
   plan `context-restructure/01-plan.md` with acceptance criteria
   (extend the sketch in 00-analysis §criteria — the context-budget
   before/after measurement is non-negotiable).
+* **Design W6** (compaction-time self-review): refine the indicator
+  taxonomy in 00-analysis, fix the ledger location + row format +
+  graduation threshold, and wire the trigger — a hook if research (d)
+  finds a compaction-adjacent event, the close-out protocol text as
+  fallback. **Start the ledger in this session and harvest this
+  session's own indicators into it** — the restructure sessions are
+  themselves evidence.
 
 **Present the plan to the owner before executing CR-2** (the QR-2/QR-3
 separation: synthesis reviewable before the corpus is rewritten). If

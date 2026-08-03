@@ -29,6 +29,12 @@ Restructure how docs + context files work, at strategy level:
    (skill inclusion, model definition, description optimization,
    permission definition, self-review, auto-updates). Instructions live
    in CLAUDE.md files.
+7. *(Added 2026-08-03, same day)* **Compaction-time self-review** — a
+   "what to do when compacting" protocol: the session reviews itself
+   for defined indicators and records them, so that which
+   skills/agents/rules/hooks are worth creating becomes an evidence
+   question answered by accumulated observations, not a taste question.
+   Instructions live in CLAUDE.md files.
 
 ## Owner-supplied target structure (2026-08-03, verbatim)
 
@@ -134,9 +140,44 @@ optimization for delegation, model selection, tool permissions, skill
 inclusion), write the when-to-create instructions, decide the
 skill-vs-agent boundary (see T8).
 
+**W6 — Compaction-time self-review + indicator ledger** (goal item 7).
+A protocol that fires at compaction and at session/slice close: the
+session reviews its own transcript-in-hand for indicators and appends
+them to a persistent ledger. The point is longitudinal: one session's
+friction is noise; the same indicator appearing five times across a
+month is a build order for a skill/agent/rule/hook. This extends the
+existing slice close-out protocol ("compaction-ready close") rather
+than replacing it. Draft indicator taxonomy for CR-1 to refine:
+
+| Indicator class | What to look for in the session | Candidate it argues for |
+|---|---|---|
+| Repeated procedure | a multi-step workflow executed ≥2× or re-derived from a plan doc (close-out steps, measurement runs, xref-fix loops) | **skill** |
+| Context pollution | long tool-output sequences that crowded the window; work that needed no shared context | **agent** (separate context) |
+| Repeated delegation shape | similar subagent prompts written from scratch more than once | **agent** (or skill wrapping the prompt) |
+| Correction pattern | the user corrected the same class of behavior again; a mistake a standing constraint would have prevented | **rule** |
+| Convention stated, not recorded | a decision made in conversation with no durable home | **rule** or docs/src entry |
+| "Whenever/before/after X" behavior | discipline enforced by memory alone (e.g. "always run the guard before applying") | **hook** (harness-enforced, not remembered) |
+| Permission friction | repeated prompts for the same safe command | **hook/allowlist** or `.claude/scripts/` pre-authorized script |
+| Re-composed pipeline | the same ad-hoc bash composed ≥2× (checks of external state especially) | **`.claude/scripts/`** script |
+| Blocked-on-owner | a question a recorded decision could have answered | docs/src **policy/ADR** gap |
+
+Record shape (draft): append-only ledger, one row per observation —
+date · session · indicator class · observation (one sentence) ·
+candidate. Location TBD in CR-1 (candidates: `.claude/observations.md`
+so it loads nowhere by default, or `docs/src/dev/roadmaps/` adjacency);
+a "rule of three"-style threshold governs when a candidate graduates to
+actually being built. Mechanics to verify in CR-1 (search-don't-recall):
+current Claude Code hook events around compaction (a PreCompact-class
+hook, if it exists, can inject the self-review reminder mechanically —
+otherwise the trigger lives in the close-out protocol text and a
+CLAUDE.md instruction, which relies on discipline; the F-13 lesson says
+prefer the mechanical trigger).
+
 Dependency order: **W2 (+ governing ADR) → W1 → W3; W4/W5 parallel after
-W1's instructions exist.** W3 is the only workstream that moves existing
-content; everything else is additive.
+W1's instructions exist; W6 lands with W1** (it is lifecycle
+instruction) **but its ledger should start immediately** — every session
+between now and CR-3 is unharvested evidence about which skills/agents
+to build.
 
 ## Tensions and open decisions (the part worth arguing about)
 
@@ -269,12 +310,27 @@ relocation decision (T2) — including the consequence disliked.
 5. The owner's six TODO markers in `.claude/CLAUDE.md` all resolved —
    filled or explicitly deferred with a dated line.
 6. `CLAUDE.local.md` gitignored (root + `.claude/`) before any exists.
+6a. The W6 self-review protocol has: a written indicator taxonomy, a
+   ledger location and row format, a graduation threshold, and a
+   trigger that is mechanical where the harness allows (hook) with the
+   close-out text as fallback; the ledger exists and carries its first
+   real rows (this restructure's own sessions count).
 7. Old paths for moved docs: `git mv` used; plans/README carries the
    old→new map; no broken inbound reference from phase docs/artifacts
    (they are historical records — their inline paths get a dated
    correction only where a reader would actually be misled).
 8. Skills/agents instructions cite the current-version guidance they
    were checked against (search-don't-recall, with dates).
+
+## Appendix — seed observations for the W6 ledger (harvested from the 2026-08-03 QR-3 session, this analysis's own session; CR-1 migrates these into the real ledger)
+
+| Date | Indicator class | Observation | Candidate |
+|---|---|---|---|
+| 2026-08-03 | repeated procedure | the slice close-out protocol (commit → memory update → rewrite/retire kickoff file) has now been executed manually in every QR/phase session; steps re-read from the plan doc each time | skill: `slice-close` |
+| 2026-08-03 | repeated procedure | the dated-amendment pattern (edit + dated italic note + finding ID + `just audit`) was applied ~15× in one session, shape re-derived each time | skill (or pattern doc + snippet) |
+| 2026-08-03 | correction pattern | `git add -A` swept generated `docs/book/` into a commit; caught after the fact, fixed by amend + gitignore | hook: pre-commit check for untracked generated dirs (gitignore fixed the instance, not the class) |
+| 2026-08-03 | "whenever X" by memory | "run `just audit` after any docs/plans edit" is enforced only by discipline | hook: PostToolUse/pre-commit audit trigger |
+| 2026-08-03 | convention stated, not recorded | kickoff files that pin volatile facts ("91 tests green … stop if not") go stale and halt successor sessions (R-11); the fix each time is ad-hoc | rule: kickoff files name the *command* to verify state, never the expected number |
 
 ## Known constraints carried from house rules
 
