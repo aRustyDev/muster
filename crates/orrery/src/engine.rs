@@ -15,7 +15,7 @@ use crate::model::{
     Violation, ViolationId, ViolationKind,
 };
 use crate::repo::Repository;
-use crate::travel::{self, ClosureReport, ClosureScope};
+use crate::travel::{self, ClosureReport, ClosureScope, Feasibility};
 use crate::{derive, incremental};
 
 use crate::detect::impossible_travel::{self, Placed};
@@ -196,6 +196,79 @@ impl<R: Repository> Engine<R> {
             }
         }
         Ok(out)
+    }
+
+    /// ADR-0014's core feature (Phase 6a): can `person` reach their first
+    /// placed event in `window` from one of their anchors, departing no
+    /// earlier than `depart_not_before`? Returns a verdict only —
+    /// durations and provenance, never an anchor or a location
+    /// (Rule 00.6/09; asserted by the `privacy_` tests).
+    ///
+    /// Semantics as pre-committed in phases/06a-engine-surfaces.md: the
+    /// first event is the earliest placed event in `window` starting at or
+    /// after `depart_not_before`; applicable anchors are those valid at
+    /// `depart_not_before` (`applies_when` is stored but unread until
+    /// ADR-0017); the verdict is the best across applicable anchors —
+    /// `Feasible` if any anchor makes it (the don't-accuse rule), else the
+    /// least-bad known route's `Infeasible` (this is a query, not a
+    /// violation: the caller decides whether to accuse), else `Unknown`
+    /// (no anchors, no placed event, or no known route — never an
+    /// accusation). Deliberately NOT wired into `sweep()`: a sweep-side
+    /// anchor violation needs a `depart_not_before` policy source the
+    /// engine doesn't have (mobility profiles, ADR-0017, or app-supplied
+    /// day boundaries — phase-doc carry-forward).
+    pub fn first_event_feasibility(
+        &self,
+        person: PersonId,
+        window: Interval,
+        depart_not_before: Timestamp,
+    ) -> Result<Feasibility> {
+        let placed = self.placed_for(person, window, &[])?;
+        let Some(first) = placed
+            .iter()
+            .filter(|p| p.window.start() >= depart_not_before)
+            .min_by_key(|p| (p.window.start(), p.event))
+        else {
+            return Ok(Feasibility::Unknown);
+        };
+        let gap_s = (first.window.start().micros() - depart_not_before.micros()) / 1_000_000;
+
+        let mut best = Feasibility::Unknown;
+        for anchor in self.repo.anchors_for(person, depart_not_before)? {
+            let verdict = if anchor.structure == first.location {
+                Feasibility::Feasible { slack_s: gap_s }
+            } else {
+                match self.repo.travel_best(anchor.structure, first.location)? {
+                    None => Feasibility::Unknown,
+                    Some(cost) if gap_s >= cost.duration_s => Feasibility::Feasible {
+                        slack_s: gap_s - cost.duration_s,
+                    },
+                    Some(cost) => Feasibility::Infeasible {
+                        deficit_s: cost.duration_s - gap_s,
+                        provenance: cost.provenance,
+                    },
+                }
+            };
+            best = match (best, verdict) {
+                (Feasibility::Feasible { slack_s: a }, Feasibility::Feasible { slack_s: b }) => {
+                    Feasibility::Feasible { slack_s: a.max(b) }
+                }
+                (f @ Feasibility::Feasible { .. }, _) | (_, f @ Feasibility::Feasible { .. }) => f,
+                (
+                    i @ Feasibility::Infeasible { deficit_s: a, .. },
+                    j @ Feasibility::Infeasible { deficit_s: b, .. },
+                ) => {
+                    if b < a {
+                        j
+                    } else {
+                        i
+                    }
+                }
+                (i @ Feasibility::Infeasible { .. }, Feasibility::Unknown) => i,
+                (Feasibility::Unknown, v) => v,
+            };
+        }
+        Ok(best)
     }
 
     /// Incremental digest for one person at `at` (salsa-memoized).

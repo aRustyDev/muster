@@ -13,8 +13,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    Actor, ClosureEntry, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person,
-    PersonId, Role, Traverse, Violation, ViolationId,
+    Actor, Anchors, ClosureEntry, Event, EventId, Group, GroupId, Location, LocationId, Obligation,
+    Person, PersonId, Role, Traverse, Violation, ViolationId,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -89,6 +89,12 @@ pub enum Command {
     /// values cannot drift (ADR-0008). Sibling-tier rule validated unless
     /// the edge carries `sibling_override` or touches a portal.
     AddTraversePair(Traverse),
+    /// Personal anchor (ADR-0014): the producer Phase 6a adds so
+    /// worlds-with-anchors can exist at all. The target must be
+    /// `Structure`-tier (ADR-0014, consistent with ADR-0009/0010).
+    /// The stored relation never crosses the coordinator boundary
+    /// (Rule 00.6/09) — feasibility consults return verdicts only.
+    AddAnchor(Anchors),
     WaiveViolation {
         id: ViolationId,
         by: Actor,
@@ -136,6 +142,11 @@ impl Command {
             Command::HoldLocation { .. } => "hold_location",
             Command::AddContainment { .. } => "add_containment",
             Command::AddTraversePair(_) => "add_traverse_pair",
+            // Touches no mirrored fact class (memberships/subgroups/
+            // expectations), so incremental::refresh_after correctly
+            // ignores it — audited at introduction (Phase 6a; the
+            // plan-review CR-1 standing trap).
+            Command::AddAnchor(_) => "add_anchor",
             Command::WaiveViolation { .. } => "waive_violation",
             Command::RecordViolation(_) => "record_violation",
             Command::ResolveViolation { .. } => "resolve_violation",

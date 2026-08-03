@@ -17,8 +17,8 @@ use crate::command::{Command, CommandReceipt};
 use crate::error::Result;
 use crate::interval::{Interval, Timestamp};
 use crate::model::{
-    Attends, Event, EventId, Expects, Group, GroupId, Held, Location, LocationId, MemberOf, Mode,
-    Person, PersonId, SubgroupOf, TravelCost, Traverse, Violation, Within,
+    Anchors, Attends, Event, EventId, Expects, Group, GroupId, Held, Location, LocationId,
+    MemberOf, Mode, Person, PersonId, SubgroupOf, TravelCost, Traverse, Violation, Within,
 };
 
 /// Bound on `group_ancestors` traversal depth (orrery/SPEC-02: depth 5;
@@ -48,6 +48,13 @@ pub trait Repository: Send + Sync {
 
     /// Memberships valid at `at`.
     fn memberships(&self, id: PersonId, at: Timestamp) -> Result<Vec<MemberOf>>;
+
+    /// One person's anchors valid at `at` — entity-partitioned, constant
+    /// instant, like every Orrery query. Additive trait growth (Phase 6a,
+    /// ADR-0014 producer). Engine-internal read: the relation itself never
+    /// crosses the coordinator boundary (Rule 00.6) — consults built on
+    /// this read return verdicts only.
+    fn anchors_for(&self, id: PersonId, at: Timestamp) -> Result<Vec<Anchors>>;
 
     /// Strict ancestors of `id` reachable through `subgroup_of` edges valid
     /// at `at`, each hop filtered by the same constant instant, depth

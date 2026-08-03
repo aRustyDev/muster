@@ -7,8 +7,8 @@ use orrery::engine::Engine;
 use orrery::error::Result;
 use orrery::interval::{Interval, Timestamp};
 use orrery::model::{
-    Actor, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person, PersonId,
-    Portal, Role, Tier,
+    Actor, Anchors, Event, EventId, Group, GroupId, Location, LocationId, Obligation, Person,
+    PersonId, Portal, Role, Tier,
 };
 use orrery::repo::memory::MemoryRepo;
 use orrery::repo::Repository;
@@ -69,7 +69,19 @@ pub fn build_demo_world() -> Result<(MusterService<MemoryRepo>, DemoWorld)> {
         capacity: Some(40),
         ext: Default::default(),
     };
-    let (room_id, room2_id) = (room.id, room2.id);
+    // Structure-tier anchor target (ADR-0014): present so every test that
+    // uses this world — the privacy_ family above all — runs against a
+    // world WITH anchors, the fixture the slice-2 pre-commitment found
+    // impossible before Phase 6a landed the producer.
+    let home = Location {
+        id: LocationId::new(),
+        name: "Ada's home".into(),
+        tier: Tier::Structure,
+        portal: Portal::None,
+        capacity: None,
+        ext: Default::default(),
+    };
+    let (room_id, room2_id, home_id) = (room.id, room2.id, home.id);
 
     repo.apply(Command::UpsertPerson(Person {
         id: ada,
@@ -84,7 +96,7 @@ pub fn build_demo_world() -> Result<(MusterService<MemoryRepo>, DemoWorld)> {
         timezone: None,
         ext: Default::default(),
     }))?;
-    for l in [room, room2] {
+    for l in [room, room2, home] {
         repo.apply(Command::UpsertLocation(l))?;
     }
     for (id, name, s, e) in [
@@ -137,6 +149,13 @@ pub fn build_demo_world() -> Result<(MusterService<MemoryRepo>, DemoWorld)> {
         cascades: true,
         by: Actor::System,
     })?;
+    svc.engine_mut().apply(Command::AddAnchor(Anchors {
+        person: ada,
+        structure: home_id,
+        label: "home".into(),
+        during: iv(0, 24 * 365),
+        applies_when: None,
+    }))?;
 
     Ok((
         svc,
