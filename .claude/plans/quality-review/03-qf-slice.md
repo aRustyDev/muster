@@ -114,4 +114,8 @@ deliberately-ignored harness unchanged.
 * RR&P-2: the `bench`/`bench-canonical` doors now point here — closing
   RR&P-2 replaces both guards with real targets.
 * Owner (one line, queued): confirm the provisional deny.toml license
-  allow-list.
+  allow-list. *Answered 2026-08-03: tighten — done same day; the list
+  now carries only the seven licenses at least one crate strictly
+  requires, with the per-entry justification in deny.toml itself. New
+  successor question queued: publish intent for the workspace crates
+  (decides whether `wildcards` can move warn → deny).*

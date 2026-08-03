@@ -632,7 +632,14 @@ the version are RR&P-7's validation adoption (feat(muster-server), rides
    strategy (hosted macOS vs Linux legs vs self-hosted) and the minimal
    first gate set. The W-5 license allow-list was implemented provisional
    (permissive set matching the workspace's MIT OR Apache-2.0) pending
-   the one-line confirmation.*
+   the one-line confirmation — and then **tightened on owner direction,
+   same day**: the allow-list now carries only the seven load-bearing
+   licenses the tree actually requires (deny.toml documents which crate
+   forces each entry); a new license entering the tree fails `just deny`.
+   One knob deliberately NOT tightened: `wildcards` stays `warn` because
+   the only wildcards are workspace path deps and cargo-deny's exemption
+   requires `publish = false` — publish intent is a new small owner
+   question, queued for the first release-please release.*
 3. **Human-protocol appetite** — how much usability formality pre-1.0:
    the "unaided" MVP gate definition, accessibility level for RC
    (RR&P-8 will propose a measurable floor), and MO-8's trial-protocol
