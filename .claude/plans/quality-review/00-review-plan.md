@@ -252,6 +252,43 @@ into QR-2 is not — the synthesis must be reviewable before it rewrites the
 plans corpus (the same reason the phase cadence separates pre-commitment from
 implementation).
 
+## Execution architecture *(added 2026-08-02, same day — context-budget amendment)*
+
+Inline execution was estimated at ~450–700k tokens of session context
+(QR-1 alone ~200–300k: the corpus is ~14 spec files, 9 phase docs, PRDs,
+ADR skims, plus code evidence). The review therefore runs **delegated
+where the work is reading, inline where the work is judgment**:
+
+* **QR-1 — fan-out.** One reader subagent per corpus slice: `orrery`
+  (specs + phase docs + crate evidence), `muster` family (muster,
+  muster-types, muster-server, muster-ui — they share muster's plan
+  corpus), `muster-sdk`, and one cross-cutting reader (rules, root plan
+  docs, justfiles, evidence/, CI absence). Each receives the dimension
+  taxonomy and disposition vocabulary from this plan and returns **matrix
+  cells only** — disposition + doc:line citation + one-line evidence
+  quote, no file dumps. Then one **completeness critic per corpus slice**:
+  "find quality-relevant plan statements NOT captured in the returned
+  cells" (the miss-risk control; delegated reading without a critic pass
+  is hope, not method). The main loop merges cells, spot-checks citations,
+  and does ALL Stage-B tiering itself — finding severity is judgment, not
+  reading.
+* **QR-2 — triage fan-out, synthesis inline.** Seed-source maintenance
+  verification (Rule 06 bar 2: releases, contributors — ~25–30
+  crate-shaped seeds) fans out to web-checking subagents returning
+  verdict rows. Synthesis, ordering (rules D1–D5), and the semver mapping
+  stay in the main loop.
+* **QR-3 — inline.** Rule 07 single-home placement across ~8 documents
+  needs one context holding the whole corpus map; the edits are cheap.
+* **Fresh session per slice.** Each QR slice starts clean; the only
+  carried context is this plan plus the prior slice's deliverable. No QR
+  slice piggybacks on a session that already carries other work.
+
+Why this is safe here: the review's own acceptance criteria already
+require per-cell citations, so delegated cells are spot-checkable without
+re-reading their sources. Honest cost note: delegation raises total
+billed tokens (each agent re-reads its slice) — the gain is main-context
+health and wall-clock parallelism, not spend.
+
 ## Owner touchpoints this review will surface (queue now, don't block on them)
 
 1. **Sequencing vs Muster Alpha**: recommended — run QR-1/QR-2 *before*
