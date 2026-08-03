@@ -23,9 +23,21 @@
   UI/server dependency enters the tree (QUESTION-0015).
 * **No feasibility semantics**: SDK sources construct no `ViolationKind`
   and contain no interval-overlap re-implementation — violations arrive
-  from the engine only. (Checked by source grep at phase close + review.)
+  from the engine only. *(Automated 2026-08-03, QR-2 SDK-3: `just
+  muster_sdk::check-oneway` fails the build on a match — this replaces
+  the manual "source grep at phase close". Scope is `src/` only, by
+  design: `tests/` contains the brute-force oracle, which this spec
+  requires to independently re-implement overlap, and assertions that
+  match on engine-produced kinds — consuming, not constructing. The
+  gate's own first run surfaced this scope question: QF slice, QF-R2.)*
 * **Determinism**: fixed inputs (and, later, fixed RNG seed) → identical
-  `Suggestion`, byte-for-byte on serialised output.
+  `Suggestion` on re-run, asserted by in-memory equality. *(Corrected
+  2026-08-03, QR-2 SDK-1 / review C16: this line used to promise
+  "byte-for-byte on serialised output" — unimplementable as written,
+  since the crate has no serde and nothing serialises a `Suggestion`.
+  The test asserts what exists: in-memory equality. A true
+  serialized-determinism test becomes a Muster-Alpha row where
+  suggestions first cross a wire, in muster-server.)*
 
 ## Integration
 
@@ -49,3 +61,12 @@
 Beta churn gate and the MVP/RC gates still need pre-committed definitions
 — instance class, scale, trial protocol, and the SDK perf gates the RC
 gate references (none exist yet): CARRY-FORWARD.md, review MO-8.)*
+
+*(Perf-gate referent added 2026-08-03, QR-2 SDK-2 / review F-3: the RC
+"perf gates green" gate is defined as suggest/search wall-time budgets on
+Beta-scale instances. The budgets themselves are set when RR&P-2 closes
+(harness pick + baselines, `plans/quality-review/02-additions-and-order.md`)
+and are owed green at **Muster Beta** — the gate now has an owner and a
+mechanism-to-be instead of referencing nothing. Churn/stress scale
+definition (SDK-5) is pre-committed at Muster-Beta entry. Observability:
+the sdk span table lives in Rule 05 as of 2026-08-03.)*

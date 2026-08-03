@@ -20,14 +20,17 @@ dependencies on the other two. The full boundary matrix stays at the root.
 **Rule: any fact appearing in both a root and a per-product document is a fact
 that will drift.** Link instead.
 
-## quality-review/ *(added 2026-08-02)*
+## quality-review/ *(added 2026-08-02; review completed 2026-08-03)*
 
 `quality-review/00-review-plan.md` is the pre-committed plan for the
 cross-product quality-strategy review (testing / benchmarking / profiling /
-validation / telemetry coverage of every crate). Its execution deliverables
-(gap matrix, synthesis) land in the same directory; the durable cross-crate
-strategy it produces will live at `plans/TESTING-STRATEGY.md`, per-crate
-criteria in each product's testing spec.
+validation / telemetry coverage of every crate). Executed 2026-08-02/03:
+`01-gap-matrix.md` (Stage A+B evidence), `02-additions-and-order.md`
+(Stage C+D synthesis — RR&P stages, ordering, semver), `03-qf-slice.md`
+(the QF implementation slice). The durable cross-crate strategy lives at
+`plans/TESTING-STRATEGY.md` (single home, Rule 07); per-crate criteria in
+each product's testing spec; the accepted-items ledger in
+`CARRY-FORWARD.md`; tool adoptions in ADR-0026.
 
 ## Numbering
 
@@ -40,15 +43,17 @@ QUESTION-0005 sits in `muster-sdk/questions/` and creates an apparent gap in
 Spec numbers are **per-product** and collide across products. Always qualify:
 `orrery/SPEC-03`, not `SPEC 03`. Three products each have a `00-overview.md`.
 
-## Known thin spots — Fable should fill
+## Known thin spots *(corrected 2026-08-03, quality review F-13 — the table below was stale in both directions: it still listed spec sets that landed 2026-08-02 as missing)*
 
-| Product | Has | Missing |
-|---|---|---|
-| orrery | 00-05: overview, data model, functional, non-functional, API, testing | — |
-| muster-sdk | 00 overview, 01 objectives/search | data model, API surface, testing criteria |
-| **muster** | 00 overview only | **data model, API surface, user flows, non-functional, testing criteria** |
+| Product | Has |
+|---|---|
+| orrery | 00–05: overview, data model, functional, non-functional, API, testing |
+| muster-sdk | 00–03: overview, objectives/search, API surface, testing criteria |
+| muster | 00–03: overview (incl. non-functional), data-and-roles, service API, testing criteria |
 
-The target tree marks `specs/` as Fable-generated. Those supplied here are
-drafts to build on, not a finished set — and the muster set is deliberately
-incomplete because the application surface was the least-discussed part of the
-design thread.
+No product spec set is missing wholesale any more. What remains thin is
+tracked where it can't silently vanish: stage-gate definitions owed at
+entry live in `CARRY-FORWARD.md` ("Stage-entry pre-commitments owed" and
+"Quality strategy — accepted items"); muster has no separate user-flows
+spec — flows live in the PRD and SPEC-02's surface table, a deliberate
+placement, not a gap.

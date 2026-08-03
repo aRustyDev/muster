@@ -16,8 +16,14 @@
     payload, log, or error.
 * Violation records and waivers carry actor IDs and timestamps — not
   addresses, not free-text copied from anchor data.
-* Dependencies: `cargo audit` runs in CI once CI exists; a vulnerable-dep
-  exception requires a phase-doc line with a removal date.
+* Dependencies: **`just deny` (cargo-deny) is the supply-chain and license
+  gate** — advisories, licenses, bans, sources — part of `just ci` and
+  runnable today; its advisories check subsumes cargo-audit, which remains
+  the named fallback (ADR-0026). CI wiring arrives with RR&P-1. A
+  vulnerable-dep exception requires a phase-doc line with a removal date.
+  *(Amended 2026-08-03, quality review W-5: the previous wording — "cargo
+  audit runs in CI once CI exists" — conditioned the gate on a CI that no
+  phase owned, so it had never run; review F-2/S3.)*
 * Data egress (Parquet/CSV export, ADR-0015 consequence) excludes `anchors`
   relations by default; exporting them is a separate, explicit, logged
   operation.

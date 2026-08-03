@@ -10,7 +10,7 @@ command layer.
 or a concrete datastore type in the public API. If trying a different solver
 would require changing this crate, the boundary is broken.
 
-## Module map (Phase 2 state)
+## Module map *(refreshed 2026-08-03, quality review F-13 — was "Phase 2 state")*
 
 | Module | Responsibility |
 |---|---|
@@ -19,8 +19,13 @@ would require changing this crate, the boundary is broken.
 | `interval` | `Timestamp` (i64 µs UTC), half-open `Interval`, Allen relations |
 | `command` | the single mutation chokepoint (`Command` enum, receipts) |
 | `repo` | `Repository` trait (sync — ADR-0023) + `repo::memory::MemoryRepo` |
-
-Phase 3 adds `derive`, `detect`; Phase 4 adds `travel`; later `analytics`.
+| `derive` | derived expansion (per-hop temporal filtering), digests |
+| `detect` | violation detectors + policy toggle (each with a brute-force oracle) |
+| `incremental` | salsa mirror, early cutoff, `refresh_after` (see gotcha below) |
+| `travel` | Layer-1 network + Layer-2 closure cache, `feasible(person, e1, e2)` |
+| `analytics` | engagement, capacity pressure, divergence, 2-hop co-attendance |
+| `engine` | `Engine<R>`: apply/sweep/preview_digests/severity_weight surface |
+| `tier` | location tier hierarchy rules (ADR-0009/0010) |
 
 ## Testing
 
@@ -33,7 +38,12 @@ not at all. `just check-seam` greps the public API for datastore names.
 * `MemoryRepo` **errors by design** on a second concurrent writer and on any
   read during an open write (Rule 00b). Tests rely on this; do not "fix" it.
 * `Interval::new` rejects `end <= start`; zero-length needs `at_point`.
-* Timestamps are µs since epoch UTC; `chrono` is API-boundary only and not
-  yet a dependency (QUESTION-0014 still open — closes before Phase 3).
+* Timestamps are µs since epoch UTC; `chrono` is API-boundary only and
+  still not a dependency (QUESTION-0014 closed by **ADR-0024**: UTC
+  instants internally, zones are metadata, recurrence is a consumer
+  concern — *corrected 2026-08-03, quality review F-13; this line said
+  the question was still open*).
+* `incremental::refresh_after` string-matches command kinds — every new
+  command kind MUST be added to the match by hand, and tested.
 * Traversal APIs take constant `at: Timestamp` filters only — cross-hop
   predicates are excluded by construction; do not add a predicate callback.

@@ -37,6 +37,7 @@ Columns: origin = doc:line that recorded it · owner = who resolves it now.
 | Person-scoped `select()` evaluation: replace the whole-window sweep on the interactive path (measured 2026-08-02 at p50 97.8 ms / p95 102.4 ms @ 10³ persons — budget knife-edge, zero headroom); conflicts must still land as records | 06-app.md slice-2 H4 (refuted in spirit) | **new — pre-committed for Alpha** |
 | OTLP exporter wiring behind the existing `exporter` knob (deferred from slice 2; needs a collector to receive it) | 06-app.md slice-2 dep note | **new** |
 | muster-ui REST client + `dx` web entrypoint + UI content (components/type-sharing landed in slice 2) | ADR-0025; 06-app.md slice-2 | **new** |
+| Quality-review Alpha-entry items — M-1..M-6, T-1/T-2, O-1, O-2-design; RR&P-7 and RR&P-8 close **in** the pre-commitment (D5 minimum spacing) | quality review 2026-08-03; see "Quality strategy — accepted items" below | **new** |
 
 ## Muster Beta (Phase 6 slice 4)
 
@@ -96,6 +97,44 @@ list at entry; anything dropped needs a written waiver (Rule 01.2).*
 | Orrery Beta | API-freeze definition + diff tooling (cargo-public-api absent on this host — grep fallback is not an API-diff) | 02-workspace.md:126; review (gate check) |
 | Orrery RC | docs-complete inventory | orrery/SPEC-05:60 |
 
+## Quality strategy — accepted items *(added 2026-08-03; the quality-strategy review's ledger. Full definitions: `quality-review/02-additions-and-order.md`; policy home: `TESTING-STRATEGY.md`. Review complete: QR-1 → QR-2 → QF slice → QR-3 all closed 2026-08-03.)*
+
+### RR&P stages (review-research-plan; each closes with a written pick)
+
+| Stage | Question | Gates | Closes |
+|---|---|---|---|
+| RR&P-1 | CI bring-up — **GitHub Actions owner-confirmed 2026-08-03**; runner strategy + first gate set open | everything CI-conditional: deny wiring, P3 regression gates, coverage aggregation, release-please, mutation cadence, Linux miri/sanitizer legs | before Orrery-Beta entry at latest; recommended concurrent with Muster Alpha |
+| RR&P-2 | perf harness (criterion presumptive), baselines, gate mechanism; **MemoryRepo-only until Phase 7 (D4)** | SPEC-05 Benchmark level, SDK-2 budgets, SRV-7 HTTP-edge, Phase-7 preconditions become executable | pick + skeleton ≈ Muster Alpha; CI leg after RR&P-1 |
+| RR&P-3 | coverage-guided fuzzing on this host (afl.rs front-runner per R-6) | the real "incremental fuzz green" definition (interim: ROADMAP dated note); O-6/SRV-3 targets | before Orrery-Beta entry |
+| RR&P-4 | coverage tool (cargo-llvm-cov front-runner per R-7) + informational-first policy | RR&P-5 (D2: coverage before mutation) | local leg any time; CI leg after RR&P-1 |
+| RR&P-5 | mutation rollout (cargo-mutants), scope + cadence, survivor triage on property-heavy suites | none stage-critical; recommended informational on orrery before Beta freeze | after RR&P-4 |
+| RR&P-6 | API-freeze diff tooling (cargo-semver-checks presumptive; cargo-public-api CI-leg only) | Orrery-Beta freeze gate line | before Orrery-Beta entry |
+| RR&P-7 | wire-input validation: hand-rolled `TryFrom` (null hypothesis) vs validator/garde/axum-valid; never orrery; reject errors must not echo payloads (S5) | Muster-Alpha server-input slice | at the Alpha pre-commitment |
+| RR&P-8 | UI testing approach, REST double, insta?, wasm-perf + measurable a11y floor (feeds owner touchpoint #3) | Muster-Alpha UI slice | at the Alpha pre-commitment |
+| RR&P-9 | HTTP load/stress/spike/soak harness + workload shapes (candidates deliberately unverified until it opens) | Muster-Beta entry (four P-legs with thresholds) | at the Muster-Beta pre-commitment |
+
+### Implement-now / owned rows (beyond the Alpha row above)
+
+| Item | Owner status |
+|---|---|
+| Tranche QF (W-1..W-7, W-13, W-15, SDK-3, SDK-7, SRV-1, SRV-2, M-7) | ✅ done 2026-08-03 — QF slice, merged `--no-ff` (dfb25a7); 93 tests green |
+| Tranche L — QR-3 documentary landing (TESTING-STRATEGY, ADR-0026, spec/rule amendments, dated corrections, this section) | ✅ done 2026-08-03 (this commit) |
+| O-3 memory-growth harness (dependency-free `GlobalAlloc` counter — R-10) | Orrery-Beta prep |
+| O-4 rustdoc examples on the public API | Orrery Beta (freeze) |
+| O-2 e2e span/payload privacy sweep (F-4 f) | RC pre-commitment |
+| M-8 Parquet/CSV egress test, anchors excluded by default | RC pre-commitment (posture: TESTING-STRATEGY) |
+| SDK-1's serialized-determinism test (where suggestions first cross a wire) | Muster Alpha (muster-server) |
+| SDK-4 span-attribute alignment (`sdk.batch` attributes per the Rule 05 table) | Muster Alpha |
+| SDK-5 churn/stress scale definition | Muster-Beta pre-commitment |
+| SRV-7 HTTP-edge latency vs SPEC-00's reconciled budget | Alpha exit (RR&P-2 macro leg) |
+| UI-3 ADR-0003 window-trap line in the Alpha frontend guidelines | Alpha UI slice |
+| O-7 Phase-7 bundle: differential activation, repo-* full legs, 10⁶ + SQLite re-measures, result materialisation, F-19 UUIDv7 locality bench, C18 N/A revisit if Cozo advances | Phase 7 (D4) — rows already in the Phase-7 dossier above |
+| I5 ops-validation rows (backup/restore drill, deterministic-rebuild verification) | RC pre-commitment (rebuild *design* stays a Phase-7 row — MO-9) |
+
+Rejected, reasons recorded in 02-additions-and-order.md §C.1: SDK-6
+(smoke tier — suite is fast; revisit >5 min), SRV-5 (network profiling —
+no criterion depends on it).
+
 ## Conditional / unscheduled (tracked so they can't silently vanish)
 
 | Item | Trigger | Origin |
@@ -115,3 +154,6 @@ list at entry; anything dropped needs a written waiver (Rule 01.2).*
 |---|---|
 | What did "forGQL" refer to? (Confirm LoraGraph=LoraDB, IndraGraph=IndraDB stands recorded) | 01a-paper-screen.md:104 |
 | Accept the Phase-7-entry down-select rule (2 impls), or direct 3 impls with ADR-0021 superseded? | review CR-5 |
+| Publish intent for the workspace crates — decides whether deny.toml `wildcards` moves warn → deny (cargo-deny's path-dep exemption needs `publish = false`) | QF slice 2026-08-03 (W-5 follow-on); queue for the first release-please release |
+| Rule 06 maintenance-bar wording: "releases within the last year" vs "releases *or sustained commit activity*" — changes divan's and samply's verdicts, nothing else | quality review R-9 |
+| Human-protocol appetite (touchpoint #3): deferred knowingly 2026-08-03 — a11y half arrives as RR&P-8's concrete proposal at the Alpha pre-commitment; unaided/trial-protocol half owed no earlier than the MVP pre-commitment | quality review F-10 |

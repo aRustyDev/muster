@@ -17,10 +17,20 @@ pre-commits against every row there**, `muster/phases/06-app.md`
 (slices 1–2 Results), and `orrery/phases/06a-engine-surfaces.md` (the
 engine surfaces you now have: `preview_digests` with the honesty
 property already proven engine-side, `analytics`, `AddAnchor` +
-`first_event_feasibility`). Workspace state: **91 tests green on
-`main`** (+1 deliberately ignored measurement harness); run
-`cargo nextest run --workspace` before you start and stop if that is
-not what you see.
+`first_event_feasibility`). Workspace state: **93 tests green on
+`main`** (+1 deliberately ignored measurement harness; count updated
+2026-08-03 — the QF quality-fixes slice added `error_contract` and
+`wire_names`); run `cargo nextest run --workspace` before you start and
+stop if that is not what you see.
+
+**Quality-review inputs to the pre-commitment (added 2026-08-03, QR-3):**
+the slice pre-commitment also adopts the Alpha-entry quality items —
+M-1..M-6, T-1/T-2, O-1 + O-2-design (all specified in the products'
+testing specs, dated 2026-08-03) — and closes **RR&P-7** (wire-input
+validation: library or hand-rolled `TryFrom`) and **RR&P-8** (UI testing
+approach + a11y floor) *in* the pre-commitment, one slice ahead of their
+implement items (rule D5, minimum spacing). See CARRY-FORWARD "Quality
+strategy — accepted items" and `plans/TESTING-STRATEGY.md`.
 
 **The slice: Muster Alpha (06-app.md slice 3) — coordinator flow.**
 ROADMAP gate: **"groups, expectations, blast-radius preview, violation
@@ -63,8 +73,10 @@ comments show the no-op form. `Engine::preview_digests` rejects
 non-mirrored kinds with `PreviewUnsupported` (muster-server already maps
 it to 400).
 
-Gates as always (nextest, clippy -D warnings, fmt, doc-check, check-seam
-grep fallback — no rustup on this host — check-scope, check-xrefs).
+Gates as always (nextest, clippy -D warnings, fmt, test-doc, doc-check,
+deny, check-seam grep fallback — no rustup on this host — check-scope,
+check-oneway, check-xrefs; `just ci` covers the workspace set since the
+QF slice).
 Results refutations-first; plain-language artifact in
 `plans/muster/artifacts/`; merge `--no-ff`; update PLAN rows and tick
 the ledger; rewrite this file. Conventional Commits; `Refs:` footers;

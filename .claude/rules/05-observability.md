@@ -5,10 +5,15 @@
 * `orrery` and `muster-sdk` emit `tracing` spans and events. They **never**
   install a global subscriber, never initialise an exporter, never depend on
   `opentelemetry-*` directly.
-* `muster` installs the subscriber and selects the exporter via `figment`
-  config: `opentelemetry-stdout` in development, `opentelemetry-otlp` or
-  `opentelemetry-prometheus` in deployment, bridged with
-  `tracing-opentelemetry`.
+* **`muster-server` installs the subscriber** and selects the exporter via
+  `figment` config (`ORRERY_OTEL_EXPORTER`): `opentelemetry-stdout` in
+  development, `opentelemetry-otlp` or `opentelemetry-prometheus` in
+  deployment, bridged with `tracing-opentelemetry`. *(Corrected 2026-08-03,
+  quality review F-9/SRV-6: this rule named `muster`, but the subscriber
+  landed in `muster-server` — the deployable binary and the privacy
+  boundary's enforcement point (ADR-0025) — and `muster` carries no
+  tracing/figment dependency at all; its dead `run-dev` knob was removed in
+  the QF slice. The landed architecture is right; the text was wrong.)*
 
 Violating this makes the engine untestable without a collector and unusable as a
 library.
@@ -22,6 +27,19 @@ library.
 | `detect.run` | detector kind, subjects scanned, violations emitted |
 | `travel.closure_refresh` | scope, pairs computed, source (measured/estimated) |
 | `repo.<operation>` | **`backend` attribute** — memory / sqlite / graph |
+
+## What to instrument in `muster-sdk` *(added 2026-08-03, quality review SDK-4 — these spans landed ad-hoc in Phase 5; this table makes them spec)*
+
+| Span | Attributes |
+|---|---|
+| `sdk.suggest` | requests, rooms |
+| `sdk.search` | seed_n, max_evals |
+| `sdk.batch` | *(none yet — alignment owed at the Muster-Alpha slice: window, digests changed, violations swept)* |
+
+Other dispositions, same date: **muster-ui** carries no instrumentation
+before Beta — revisit only with a real diagnostic need (UI-4); the orrery
+correlation-ID-per-command promise is implemented and tracked as a
+CARRY-FORWARD conditional row (operability work), not owed by any stage.
 
 ## The `backend` attribute is load-bearing
 

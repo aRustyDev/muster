@@ -12,7 +12,7 @@ muster-types.workspace = true
 
 [features]
 # `dx serve --features web` builds the WASM app; the bare library (checked
-# by workspace CI on the host) carries components only.
+# by the cargo-hack no-features leg of `just matrix`) carries components only.
 default = []
 web = ["dioxus/web"]
 

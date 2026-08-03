@@ -114,6 +114,15 @@ Muster surfaces in dependency order: member self-selection → coordinator group
 
 Output: `phases/06-app.md`.
 
+*Amended 2026-08-03 (quality review, QR-3): the Alpha slice (slice 3)
+pre-commitment additionally closes **RR&P-7** (wire-input validation) and
+**RR&P-8** (UI testing approach) and adopts the Alpha-entry quality items
+— the ledger's "Quality strategy — accepted items" section is the
+authoritative list. Before Orrery-Beta entry, **RR&P-1** (CI), **RR&P-3**
+(fuzzing — it redefines the Beta fuzz gate) and **RR&P-6** (API-diff
+tooling) must close; **RR&P-9** closes at the Muster-Beta pre-commitment.
+Definitions: `quality-review/02-additions-and-order.md` §C.2.*
+
 ### Phase 6a — Engine surfaces for the app (parallel with Phase 6)
 *Added 2026-08-02 (plan review CR-2/CR-4): this work was promised by the
 ROADMAP (orrery "○ compute" preview; Orrery Alpha analytics) but owned by no

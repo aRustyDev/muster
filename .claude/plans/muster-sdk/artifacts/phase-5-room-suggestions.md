@@ -29,9 +29,16 @@ good as any clever one — if a perfect arrangement exists at all, this
 method finds one.
 
 We didn't just cite the theorem — we made the computer try to break it.
-Thousands of random schedules were solved three ways at once: by our
-assistant, by brute force (trying every possible arrangement), and by a
-"busiest moment" head-count. All three agreed on every single instance.
+Random schedules were solved three ways at once: by our assistant, by
+brute force (trying every possible arrangement), and by a "busiest
+moment" head-count. All three agreed on every single instance.
+
+*(Corrected 2026-08-03, quality review F-6: this paragraph originally
+said "thousands of random schedules" — the measured run is pinned at
+**48 generated schedules per property** (a documented budget, raisable
+via `PROPTEST_CASES` for deep runs), roughly 40× fewer than claimed. The
+three-way agreement holds on every instance actually generated; the
+count was inflated, not the result.)*
 
 ```mermaid
 flowchart LR

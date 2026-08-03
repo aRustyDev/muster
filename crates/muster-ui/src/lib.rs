@@ -2,8 +2,12 @@
 //! DTOs. Structure is the Prototype deliverable — shared types compile-
 //! checked against the same contract the server serves. Content, the REST
 //! client, and the `dx` web entrypoint are Alpha scope (recorded in
-//! phases/06-app.md); this library builds host-side under workspace CI
-//! and gains the `web` renderer only under `--features web`.
+//! phases/06-app.md); this library builds host-side under the local
+//! workspace gates — `just ci`, plus the bare no-features leg of
+//! `just matrix` (cargo-hack) — and gains the `web` renderer only under
+//! `--features web`. (Corrected 2026-08-03, quality review F-13/F-11:
+//! this header claimed "workspace CI" checks the bare library; no CI
+//! exists yet — RR&P-1 — and the bare leg first ran on 2026-08-03.)
 
 use dioxus::prelude::*;
 

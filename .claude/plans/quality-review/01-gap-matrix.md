@@ -801,3 +801,35 @@ F-4(a,d), F-5, F-8, F-12, F-18(e); RR&P candidates F-2 (CI platform),
 F-3 (perf gating + tool pick), F-7 (fuzzing on this host), F-11
 (feature-matrix policy); QR-3 landing items F-6, F-9, F-13; taxonomy
 candidates for Stage C: privacy testing, ops-validation/DR.
+
+## Addendum (2026-08-03, QR-3 — Stage-E maintenance of this matrix)
+
+**S5/I5 enter the matrix.** QR-2 adopted both review-added dimensions
+(definitions now live in `TESTING-STRATEGY.md`, the durable home); the
+taxonomy is **42 dimensions, 42 × 7 = 294 cells**. The fourteen new
+cells, dispositioned per QR-2 §C.0:
+
+| Dim | orrery | m-sdk | muster | m-types | m-server | m-ui | ws/CI |
+|---|---|---|---|---|---|---|---|
+| S5 Privacy testing | ◐ | ◐ | ◐ | ◐ | ◐ | ✗ | ◐ |
+| I5 Ops-validation / DR | ✗ | — | ✗ | — | ✗ | — | ✗ |
+
+S5 evidence is F-4's channel inventory (engine-payload and wire
+assertions real; log/error/span/session/egress channels written but
+unasserted — the O-1/O-2/M-5/M-8/T-2 items consume these). I5: every
+applicable row stays gap until the RC pre-commitment defines the drills
+(muster-types/-sdk/-ui carry no operational surface — N/A).
+
+**R-11 — the staleness cluster was undercounted, including by itself.**
+F-13 claims "twelve instances across eight files"; enumerating its own
+list yields **thirteen** (exactly the Rule 01.6 arithmetic class the
+review exists to catch, in the review's own finding). Landing the sweep
+found **three further kin instances** the matrix missed:
+`crates/muster-ui/Cargo.toml`'s feature comment repeated the "workspace
+CI" false premise; `docs/src/SUMMARY.md` never indexed ADR-0025; and
+`plans/NEXT-SESSION.md` still pinned "91 tests green on `main` … stop if
+that is not what you see" after the QF slice made it 93 — a stale gate
+that would have halted the next session (a QF close-out protocol miss,
+recorded against the "compaction-ready close" rule). All sixteen
+instances are corrected as of this date, each with a dated line at the
+site.

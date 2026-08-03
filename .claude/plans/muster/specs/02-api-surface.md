@@ -36,5 +36,9 @@ DTO mapping, and orchestration — never feasibility logic (Rule 03).
 
 `anyhow` at the binary edge only; service functions return typed errors.
 `figment` configuration enters when the first real deployment knob exists,
-not before. Observability: this crate installs the subscriber (Rule 05);
-`ORRERY_OTEL_EXPORTER=stdout` in dev.
+not before. Observability: **`muster-server` installs the subscriber**
+(Rule 05); `ORRERY_OTEL_EXPORTER=stdout` in dev (`just
+muster_server::run-dev`). *(Corrected 2026-08-03, quality review
+F-9/SRV-6: this line said "this crate" — the subscriber landed in
+muster-server with the H5 config knob, and muster has no tracing/figment
+dependency; Rule 05 amended the same date.)*

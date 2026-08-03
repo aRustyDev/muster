@@ -46,6 +46,14 @@
 | MVP | whatever Muster MVP requires, nothing more | Muster MVP ships on it |
 | RC | privacy boundary tested, deterministic rebuild, docs | all `orrery/SPEC-05` gates pass |
 
+*(Gate definition added 2026-08-03, quality review O-5/F-7: until RR&P-3
+closes, the Beta gate "incremental fuzz green" means **the
+`prop_incremental` family green at its documented case budget** — the
+corpus's "fuzz" has always meant proptest, and no document said which
+tests constitute the gate. This is an honest narrowing, not a new
+promise; RR&P-3 (coverage-guided fuzzing viability on this host) redefines
+the gate before Orrery-Beta entry — Rule 01.2 either way.)*
+
 ## Muster-SDK
 
 | Stage | Contents | Exit gate |
@@ -109,6 +117,39 @@ Hard dependencies:
   Muster Beta "full track", both MVP human-outcome gates). Each stage's
   entry pre-commitment must define its gate before work starts —
   the debts are itemised in `CARRY-FORWARD.md`.
+
+## Quality-strategy ordering and semver *(added 2026-08-03, QR-3 — mirrors `quality-review/02-additions-and-order.md` §D.2/D.3, which holds the full item lists and edge citations)*
+
+Accepted quality work lands in dependency-honest tranches (ordering rules
+D1–D5: infrastructure before consumers · measurement before optimization ·
+surfaces before their tests · ADR-0021 funnel discipline · RR&P closes one
+slice before its implement items):
+
+* **QF** (done 2026-08-03, merged `--no-ff`): broken doors fixed,
+  cargo-deny/cargo-hack adopted, variance policy applied, boundary gates
+  hardened, error→status + wire names pinned. **L** (this landing):
+  the documentary amendments, dated 2026-08-03.
+* **A — Muster Alpha entry**: M-1..M-6, T-1/T-2, O-1/O-2-design;
+  RR&P-7 (validation) and RR&P-8 (UI testing) close at the
+  pre-commitment. **B — concurrent with Alpha**: RR&P-1 (CI bring-up;
+  GitHub Actions owner-confirmed) and RR&P-2's local leg (bench harness
+  pick + MemoryRepo-only skeleton).
+* **CI** (after RR&P-1): deny CI wiring, regression gates, coverage
+  aggregation, release-please activation, Linux miri/sanitizer legs.
+  **M**: RR&P-4 (coverage) → RR&P-5 (mutation, informational on orrery
+  before Beta freeze).
+* **PB — before Orrery Beta**: RR&P-3 (fuzzing) redefines the fuzz gate,
+  RR&P-6 (API-diff tooling), O-3 (memory growth), O-4 (rustdoc examples),
+  SDK-2 budgets defined. **MB**: RR&P-9 (load harness) + SDK-5 at the
+  Muster-Beta pre-commitment. **P7**: everything datastore-shaped (O-7
+  bundle). **RC**: M-8 egress test, O-2 e2e sweep, I5 ops-validation rows.
+
+Semver (soft estimates, Rule 01.4 — one workspace version, release-please
+over Conventional Commits, **inactive until RR&P-1 provides a runner**;
+recommendation: baseline-tag at activation): quality work itself is
+version-invisible (`test:`/`chore:`). Muster Alpha ≈ **0.2.0** · Orrery
+Beta + Phase 7 ≈ **0.3.0** · Muster Beta ≈ **0.4.0** · MVP ≈ **0.5.0** ·
+RC ≈ 0.6.x → **1.0.0** at RC exit.
 
 ## Deferred
 

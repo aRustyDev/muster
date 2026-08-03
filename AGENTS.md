@@ -18,13 +18,17 @@ Each crate's own `AGENTS.md` has its module map and gotchas.
 ## Build / test
 
 ```
-just doctor          # toolchain check (cargo-nextest optional; cargo test works)
-just ci              # fmt-check + clippy -D warnings + tests + doc build
+just doctor          # toolchain check (nextest/deny/hack are required by the recipes)
+just ci              # fmt-check + clippy -D warnings + tests + doctests + doc build + deny
 cargo test --workspace          # plain fallback
 just orrery::check-seam         # no datastore type in orrery's public API
-./docs/scripts/check-xrefs.sh   # docs cross-reference audit
+./docs/scripts/check-xrefs.sh   # docs cross-reference audit (= just audit)
 ./evidence/run_all.sh           # reproduce the datastore benchmarks (~8 min)
 ```
+
+*(Refreshed 2026-08-03, quality review F-13: nextest was described as
+"optional" while every test recipe requires it. Cross-crate testing
+policy: `.claude/plans/TESTING-STRATEGY.md`.)*
 
 ## Invariants worth memorising
 

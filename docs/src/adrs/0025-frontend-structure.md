@@ -95,6 +95,15 @@ bearing half of the decision, per the verification above.
   exactly why that crate must stay the single wire-type source.
 * `dx` joins the dev toolchain for UI work only; server and workspace
   tests never need it (CI runs cargo/nextest as before).
+  *(Factual correction 2026-08-03, quality review F-2/F-11/UI-2: the
+  parenthetical assumed a CI that has never existed — no CI configuration
+  is present in this repository; the gates it describes run locally via
+  `just ci`. The claim that the bare (no-features) muster-ui library is
+  "checked by workspace CI" was likewise false as written: that
+  configuration was first gate-exercised on 2026-08-03, locally, by the
+  cargo-hack no-features leg of `just matrix`. CI bring-up is owned by
+  RR&P-1 (GitHub Actions, owner-confirmed 2026-08-03) —
+  `plans/quality-review/02-additions-and-order.md`.)*
 * If a future consumer needs typed streaming (live violation inbox), add
   it as an explicit endpoint contract in `muster-types` first; reaching
   for dioxus-fullstack then would be a new ADR superseding this one.

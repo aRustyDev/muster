@@ -74,3 +74,10 @@ piece of engine work (a "what would change if…" preview that doesn't
 write anything) has to land first; it's scheduled and tracked.
 
 *Everything above is asserted by 72 automated tests, all green.*
+
+*(Corrected 2026-08-03, quality review F-6: 72 was the whole-workspace
+test count on that date — the engine's tests included — not the number of
+tests asserting this artifact's claims. The member-flow behaviours above
+are asserted specifically by the muster/muster-server `e2e_` and
+`privacy_` families; the workspace total has since grown and is not a
+property of this document.)*

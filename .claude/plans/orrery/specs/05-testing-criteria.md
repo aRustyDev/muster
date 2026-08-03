@@ -30,7 +30,12 @@ recomputation after an arbitrary mutation sequence. Fuzz the sequence.
 
 **Benchmark.** The seven canonical queries at 10³ / 10⁵ / 10⁶ `attends` edges.
 Interactive and batch classes tracked separately. Regression gate on the
-budgets in SPEC 03.
+budgets in SPEC 03. *(Mechanism note, 2026-08-03 — quality review F-3: no
+micro-bench harness exists yet; `just bench` fails loudly by design. The
+harness pick, baseline location, and gate mechanism are RR&P-2
+(`plans/quality-review/02-additions-and-order.md`), which runs
+MemoryRepo-only until Phase 7 — funnel discipline. The interim coarse
+mechanism is the measure_ harnesses' in-test 10× sanity bounds.)*
 
 ## Seeded fixtures
 
@@ -52,6 +57,28 @@ Generated worlds must deliberately contain:
 
 The expired mid-chain edge is the critical one: it is what distinguishes true
 per-hop temporal filtering from whole-path post-filtering.
+
+## Quality-review additions (2026-08-03, QR-3 — items resolve in `plans/quality-review/02-additions-and-order.md`; cross-crate policy in `plans/TESTING-STRATEGY.md`)
+
+* **Privacy: log and error channels (O-1, F-4 a — owner: Muster-Alpha
+  entry).** The `privacy_` family extends beyond payloads: a capturing
+  test subscriber asserts no coordinate reaches any log line or span
+  attribute, and a type-level test asserts no error variant carries
+  coordinate fields (Rule 09 promises "payload, log, or error" — only
+  payload is asserted today).
+* **Privacy: span capture (O-2, F-4 e/f).** The capturing subscriber
+  above IS the design for the span-capture check that phase-4-privacy.md
+  queued for RC without designing; the RC-scoped end-to-end sweep (no
+  anchor coordinate in any coordinator-facing payload, full stack) is an
+  owned CARRY-FORWARD row, no longer a floating promise.
+* **Memory-growth harness (O-3, P7/P12 — owner: Orrery-Beta prep).**
+  Salsa-mirror and violation-store growth measured over long command
+  streams, `measure_`-style (explicit run, W-2 variance policy).
+  Dependency-free by decision: a ~50-line counting `GlobalAlloc` wrapper
+  — dhat-rs failed the Rule 06 maintenance bar (review R-10).
+* **Rustdoc examples (O-4 — owner: Orrery Beta).** The public API gets
+  rustdoc examples at the Beta freeze; `just test-doc` executes them
+  (they feed the RC "docs complete" criterion something runnable).
 
 ## Release gates
 
