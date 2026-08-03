@@ -10,3 +10,6 @@ repository.workspace = true
 orrery.workspace = true
 muster-sdk.workspace = true
 anyhow.workspace = true
+
+[lints]
+workspace = true
