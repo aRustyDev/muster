@@ -19,6 +19,16 @@ Measured at 10⁶ `attends` edges / 10k persons / 10k events.
 Interactive and batch budgets are tracked **separately** — they have different
 bottlenecks and conflating them misleads.
 
+> *Added 2026-08-02 (Phase 6a, plan-review CR-4): the **Orrery Alpha exit
+> gate** ("budgets met at 10⁵", ROADMAP) was unexitable as written — this
+> table is headed 10⁶ and no 10⁵ budget set existed. Definition: the Alpha
+> gate uses the **same budget thresholds as this table**, evaluated at
+> **10⁵ `attends` / 10³ persons / 10³ events / 200 locations** (the 10⁶
+> dimensions ×0.1). Rationale: budgets are ceilings; Alpha is the same
+> contract at a tenth the scale; Beta re-checks at 10⁶. Measured on
+> MemoryRepo by `crates/orrery/tests/measure_alpha_budgets.rs`; per-class
+> verdicts in `phases/06a-engine-surfaces.md` Results.*
+
 ## Scale targets
 
 | Dimension | v1 target | Stretch |
