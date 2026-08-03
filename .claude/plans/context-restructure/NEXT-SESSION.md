@@ -1,67 +1,44 @@
-# Next-session kickoff — context/docs restructure (CR-1)
+# Next-session kickoff — context/docs restructure (CR-2)
 
-*Written 2026-08-03 in the session that produced `00-analysis.md`. Paste
-the prompt below into a fresh session in this repo. Rewrite this file at
-each CR slice close (the standing close-out protocol); delete it when
-the restructure lands.*
+*Rewritten 2026-08-03 at CR-1 close (standing protocol). Delete this
+file when the restructure lands.*
 
 ---
 
-You are starting the Orrery/Muster **context/docs restructure**. Your
-project memory has `context-restructure-state` — trust it for
-orientation; the repo is the state of truth. Read, in order:
+**GATE: CR-2 is blocked on owner review.** ADR-0027 (`docs/src/adrs/
+0027-docs-and-context-architecture.md`, status `proposed`) and
+`01-plan.md` §2's owner queue must be reviewed first — especially the
+@-import deviation, the PLAN/ROADMAP move, the CR-4 deferral, and the
+ADR topic assignments. If the owner has not approved, stop and ask.
 
-1. `.claude/plans/context-restructure/00-analysis.md` — the first-draft
-   analysis: the owner's target tree (verbatim), the inventory of what
-   exists, five workstreams (W1–W5), ten tensions (T1–T10), phasing,
-   and the acceptance-criteria sketch. **This is your scope contract;
-   do not re-derive it.**
-2. `.claude/rules/02-decision-records.md` and
-   `.claude/rules/07-context-files.md` — the two rules this goal amends
-   (they are also already in your loaded context).
-3. `.claude/plans/README.md` + `.claude/plans/TESTING-STRATEGY.md` —
-   the pilot decomposition target (T3).
-4. The owner's TODO markers at the bottom of `.claude/CLAUDE.md` —
-   the landing sites for W1's meta-instructions.
+You are executing **CR-2 — migrate + land** of the context/docs
+restructure. Project memory `context-restructure-state` orients you;
+the repo is the state of truth. Read, in order:
 
-This session: **CR-1 — research, decisions, pre-committed plan.**
+1. `.claude/plans/context-restructure/01-plan.md` — **the pre-committed
+   plan; execute §7 verbatim, acceptance criteria §8.** Do not re-derive
+   decisions; they are in ADR-0027.
+2. `.claude/plans/context-restructure/draft-rule-10-docs-structure.md`
+   — lands as `.claude/rules/10-docs-structure.md` in §7 step 7, with
+   the amendments listed at its foot.
+3. `.claude/observations.md` — the W6 ledger (live; harvest into it at
+   close).
 
-* **Research first, search-don't-recall** (delegate to the
-  claude-code-guide agent / current docs; cite versions and dates):
-  (a) actual loading semantics of `.claude/rules/**`, `@`-references,
-  and CLAUDE.local.md in current Claude Code — T1/T7 turn on this;
-  (b) current best practices for SKILLS (progressive disclosure,
-  frontmatter, scripts, schemas) and CUSTOM AGENTS (description
-  optimization, model/tool/permission definition) — W4/W5;
-  (c) mdbook SUMMARY automation options — T6;
-  (d) current Claude Code **hook events** — especially any
-  compaction-adjacent event — for W6's mechanical trigger.
-* **Decide** T2 (ADR relocation: leaning = keep global numbers, nest by
-  topic, update tooling), T3 (the four boundary definitions), T5 (the
-  migration inventory; scope creep is the failure mode — specs/PRDs
-  are OUT unless the owner says otherwise). Queue anything genuinely
-  owner-shaped rather than guessing.
-* **Write**: the governing ADR (next free number — verify via
-  `just docs::adr-next`; status `proposed` until the owner reviews),
-  the draft W2 structural rule(s), and the pre-committed implementation
-  plan `context-restructure/01-plan.md` with acceptance criteria
-  (extend the sketch in 00-analysis §criteria — the context-budget
-  before/after measurement is non-negotiable).
-* **Design W6** (compaction-time self-review): refine the indicator
-  taxonomy in 00-analysis, fix the ledger location + row format +
-  graduation threshold, and wire the trigger — a hook if research (d)
-  finds a compaction-adjacent event, the close-out protocol text as
-  fallback. **Start the ledger in this session and harvest this
-  session's own indicators into it** — the restructure sessions are
-  themselves evidence.
+Mechanics that will bite:
 
-**Present the plan to the owner before executing CR-2** (the QR-2/QR-3
-separation: synthesis reviewable before the corpus is rewritten). If
-the owner approves in-session and context budget allows, proceed to
-CR-2 (migration) in this session; otherwise close and rewrite this
-kickoff for CR-2.
+* Branch `feat/cr2-docs-restructure`; merge `--no-ff` when §8 is green.
+* Gates after every commit — verify by running them, never by trusting
+  a prior session's claim: `just audit && just docs::build && just
+  docs::check-links` (check-links was red until CR-1 fixed six fence
+  tags; it is now a load-bearing criterion).
+* Tooling updates land and prove green on the FLAT tree before any
+  `git mv` (§7 step 2); the pilot decomposition (§5) has a STOP-check.
+* `mdbook test` compiles untagged fences as Rust — tag every fence in
+  every migrated/created doc.
+* Measure after-cost with `.claude/scripts/context-cost.sh` (create in
+  preflight) against the 404-line baseline (§8.3).
 
-Gates: `just audit`, `just docs::build` green on anything you commit.
 Close per the standing protocol: commit, update
-`context-restructure-state` memory, rewrite this file. Conventional
+`context-restructure-state` memory, rewrite this file for CR-3 (skills
++ agents + scripts — outline in `01-plan.md` §10). Conventional
 Commits; `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.

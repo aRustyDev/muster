@@ -30,3 +30,4 @@
 - [24. Time is UTC instants internally; zones are metadata; recurrence is not an engine concern](adrs/0024-time-representation.md)
 - [25. Frontend structure: muster-server (axum) + muster-ui (dioxus) + muster-types](adrs/0025-frontend-structure.md)
 - [26. Quality tooling baseline: cargo-deny, cargo-hack, and the profiling door](adrs/0026-quality-tooling-baseline.md)
+- [27. Documentation architecture: docs/src taxonomy, ADR relocation, and context-loading strategy](adrs/0027-docs-and-context-architecture.md)
