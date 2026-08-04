@@ -64,6 +64,27 @@ criteria, and refuses to backfill a hypothesis after results are known.
 
 Output: `phases/NN-*.md`.
 
+## Owner-directed specialists (added 2026-08-04)
+
+Four specialist agents added by owner direction, ahead of
+rule-of-three (deviation recorded as a ledger row; the CR-slice roster
+review covers them like the rest):
+
+* **`dioxus-engineer`** — muster-ui implementation and `dx` CLI work,
+  inside the ADR-0025 walls (0.7.x pinned, REST only, never server
+  functions). Output: code + the check that proves it, or a
+  version-cited recommendation.
+* **`library-architect-rs-crates`** — crate/public-API architecture
+  within the Rule 00/03/06 walls; hands rule-bending designs to
+  `adr-author`. Output: design note or implemented change, gates green.
+* **`qa-architect-rs`** — the strategy/policy level of the unified test
+  framework; prepares RR&P stage decisions, never adopts ahead of a
+  stage. Sits above `benchmark-runner` (runs) and `detector-author`
+  (writes detectors + oracles). Output: dated amendment or decision
+  brief.
+* **`test-engineer-rs`** — implements and debugs tests. Output: tests +
+  passing run, or root cause + pinned regression test.
+
 ## User-level retro agents (outside this roster, still reviewed)
 
 `retro-debrief` · `retro-lessons` · `retro-knowledge` live at user
