@@ -1,46 +1,46 @@
-# Next-session kickoff — context/docs restructure (CR-2)
+# Next-session kickoff — context/docs restructure (CR-3)
 
-*Rewritten 2026-08-03 at CR-1 close (standing protocol). Delete this
-file when the restructure lands.*
+*Rewritten 2026-08-03 at CR-2 close (standing protocol). Delete this
+file when the restructure lands fully (CR-3 + the deferred CR-4).*
 
 ---
 
-**GATE: CR-2 is blocked on owner review.** ADR-0027 (`docs/src/adrs/
-0027-docs-and-context-architecture.md`, status `proposed`) and
-`01-plan.md` §2's owner queue must be reviewed first — the @-import
-deviation, the CR-4 deferral, and the ADR topic assignments (the
-PLAN/ROADMAP question was resolved 2026-08-03: they stay in plans/;
-`dev/roadmaps/` is for cross-plan summaries only). If the owner has
-not approved, stop and ask.
+**CR-2 is merged.** ADR-0027 is `accepted`; the ADR corpus lives at
+`docs/src/dev/adrs/<topic>/`; the TESTING-STRATEGY pilot decomposition
+and GLOSSARY move landed with the old→new map in `plans/README.md`;
+W1 instructions replaced the six TODO markers in `.claude/CLAUDE.md`;
+Rule 10 is live; Rules 04/05 are `paths:`-scoped. Context budget:
+**344 unconditional lines vs the 404 baseline** (verify with
+`.claude/scripts/context-cost.sh`, never by trusting this number).
 
-You are executing **CR-2 — migrate + land** of the context/docs
-restructure. Project memory `context-restructure-state` orients you;
-the repo is the state of truth. Read, in order:
+**Owed from CR-2 (verify before anything else):**
+1. The SessionStart(compact) hook (`.claude/settings.json` →
+   `compact-self-review.sh`) has **not yet been observed firing**
+   (§8.7): run `/compact` once in a scratch session and confirm the
+   reminder text appears post-compaction; record the observation in
+   the ledger. If it does not fire, debug before building on W6.
 
-1. `.claude/plans/context-restructure/01-plan.md` — **the pre-committed
-   plan; execute §7 verbatim, acceptance criteria §8.** Do not re-derive
-   decisions; they are in ADR-0027.
-2. `.claude/plans/context-restructure/draft-rule-10-docs-structure.md`
-   — lands as `.claude/rules/10-docs-structure.md` in §7 step 7, with
-   the amendments listed at its foot.
-3. `.claude/observations.md` — the W6 ledger (live; harvest into it at
-   close).
+You are executing **CR-3 — skills, agents, scripts** (01-plan §10;
+separable, can lag). Read `01-plan.md` §10 + §1 (research digest) and
+`.claude/observations.md` first. Scope:
 
-Mechanics that will bite:
+1. Build only what the ledger supports (rule of three — ADR-0027 §7).
+   Current standings: pre-commit generated-dir check (2 rows),
+   slice-close skill (1), dated-amendment (1), research-brief (1),
+   context-cost script (built at CR-2), `just gates` recipe (1 — cheap,
+   consider bundling with any justfile touch).
+2. Agent roster review against current sub-agents docs (cite version +
+   date; search, don't recall): descriptions, model/tools scoping,
+   instruction drift (adr-author was updated by CR-2 — verify, don't
+   assume), skill-vs-agent dispositions per ADR-0027 §8.
+3. W4/W5 authoring instructions: keep `.claude/CLAUDE.md` additions
+   inside the context budget; specifics belong in a docs/src pattern
+   page, not in every-session context.
 
-* Branch `feat/cr2-docs-restructure`; merge `--no-ff` when §8 is green.
-* Gates after every commit — verify by running them, never by trusting
-  a prior session's claim: `just audit && just docs::build && just
-  docs::check-links` (check-links was red until CR-1 fixed six fence
-  tags; it is now a load-bearing criterion).
-* Tooling updates land and prove green on the FLAT tree before any
-  `git mv` (§7 step 2); the pilot decomposition (§5) has a STOP-check.
-* `mdbook test` compiles untagged fences as Rust — tag every fence in
-  every migrated/created doc.
-* Measure after-cost with `.claude/scripts/context-cost.sh` (create in
-  preflight) against the 404-line baseline (§8.3).
-
-Close per the standing protocol: commit, update
-`context-restructure-state` memory, rewrite this file for CR-3 (skills
-+ agents + scripts — outline in `01-plan.md` §10). Conventional
-Commits; `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
+Mechanics: docs-typed work may land on `main` (Rule 08); run
+`just audit && just docs::build && just docs::check-links` after every
+commit; tag every code fence (mdbook test compiles untagged fences as
+Rust). Close per the standing protocol: commit, update
+`context-restructure-state` memory, rewrite this file (name commands to
+verify state, never expected numbers). Conventional Commits;
+`Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
