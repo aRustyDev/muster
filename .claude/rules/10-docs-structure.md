@@ -1,22 +1,11 @@
-# DRAFT — Rule 10 — Documentation structure (lands as `.claude/rules/10-docs-structure.md` at CR-2)
-
-*Drafted 2026-08-03 by CR-1 under ADR-0027 (proposed). Not binding until
-ADR-0027 is accepted and CR-2 moves this file into `.claude/rules/`.
-The `paths:` frontmatter below activates then; it is quoted here as
-content. CR-2 also applies the two amendments listed at the bottom.*
-
----
-
-```yaml
 ---
 paths:
   - "docs/**"
   - ".claude/**"
   - "*.md"
 ---
-```
 
-# Rule 10 — Documentation structure
+# Rule 10 — Documentation structure (ADR-0027)
 
 ## Where a durable fact lives (one home, Rule 07)
 
@@ -37,17 +26,18 @@ work, not reference.
 ## Topic taxonomy
 
 One open vocabulary shared by adrs/strategies/policies/patterns
-(testing, benchmarking, telemetry, security, domain-model,
-architecture, …). **Directories are created on first real document** —
-a stub tree reads as coverage and is a lie (namespace contract,
-ADR-0027).
+(current table: `docs/src/dev/adrs/README.md`). **Directories are
+created on first real document** — a stub tree reads as coverage and is
+a lie (namespace contract, ADR-0027).
 
 ## ADR mechanics
 
 Numbering stays global, sequential, never reused (Rule 02 — only the
 *location* changed). `just docs::adr-next` gives the number regardless
-of topic. Do not hand-edit generated SUMMARY sections; regenerate
-(`just docs::summary` after CR-2).
+of topic. Never hand-edit SUMMARY.md's generated section — run
+`just docs::summary`; `just docs::check-links` fails on a stale index.
+Tag every code fence (```text etc.) — mdbook test compiles untagged
+fences as Rust.
 
 ## Rules-directory conventions (`.claude/rules/**`)
 
@@ -60,16 +50,3 @@ of topic. Do not hand-edit generated SUMMARY sections; regenerate
   (unconditional) so the constraint's existence is never invisible.
 * Never `@`-import a rule from CLAUDE.md — imports are eager and defeat
   `paths:` scoping. `.claude/rules/**` auto-loads natively (recursive).
-
----
-
-## Amendments CR-2 applies alongside this rule
-
-* **Rule 02**: location line becomes
-  `docs/src/dev/adrs/<topic>/NNNN-kebab-title.md`, topic per Rule 10;
-  everything else unchanged.
-* **Rule 07**: placement diagram gains `docs/src/dev/**` split and
-  `.claude/skills|scripts/`; the AGENTS.md/CLAUDE.md split and budgets
-  are unchanged.
-* **rules/README.md**: index row for Rule 10; pointer lines for scoped
-  Rules 04/05.

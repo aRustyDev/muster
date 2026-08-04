@@ -2,7 +2,9 @@
 
 * **Format: MADR.** Context and Problem Statement · Decision Drivers ·
   Considered Options · Decision Outcome · Consequences.
-* **Location:** `docs/src/adrs/NNNN-kebab-title.md`, sequential, never reused.
+* **Location:** `docs/src/dev/adrs/<topic>/NNNN-kebab-title.md` —
+  numbering global and sequential, never reused; topic per Rule 10
+  *(location amended 2026-08-03 by ADR-0027; was flat `docs/src/adrs/`)*.
 * **Write an ADR when:** a choice constrains future work, a non-negotiable is
   being changed, a dependency is added, or a stated plan is being deviated from.
 * **Never silently edit an accepted ADR.** Supersede it with a new one and mark

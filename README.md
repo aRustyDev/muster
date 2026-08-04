@@ -14,7 +14,7 @@ does not schedule — it decides whether a schedule is possible.
 crates/orrery       engine: model, intervals, detectors, repository trait
 crates/muster-sdk   search & orchestration over the engine's contract
 crates/muster       application: UI, coordinator workflows, delivery
-docs/               mdbook + ADRs (docs/src/adrs/)
+docs/               mdbook + ADRs (docs/src/dev/adrs/<topic>/)
 evidence/           runnable benchmark harness behind the datastore decision
 .claude/plans/      PLAN, ROADMAP, specs, PRDs, questions, research, phases
 ```

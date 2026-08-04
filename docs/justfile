@@ -9,12 +9,18 @@ build:
 serve:
     mdbook serve --open
 
-# every ADR/SPEC/QUESTION/RESEARCH reference must resolve (agent 1, pass 2)
+# regenerate SUMMARY.md's generated section (ADR-0027)
+summary:
+    python3 scripts/gen-summary.py
+
+# every ADR/SPEC/QUESTION/RESEARCH reference must resolve (agent 1, pass 2);
+# SUMMARY.md must be current (ADR-0027)
 check-links:
+    python3 scripts/gen-summary.py --check
     mdbook test
     ./scripts/check-xrefs.sh
 
-# next free ADR number
+# next free ADR number (recursive — ADRs nest under src/dev/adrs/<topic>/, ADR-0027)
 adr-next:
-    @ls src/adrs | grep -oE '^[0-9]{4}' | sort -n | tail -1 | \
-      awk '{printf "%04d\n", $1+1}'
+    @find src/adrs src/dev/adrs -name '[0-9]*.md' 2>/dev/null | sed 's|.*/||' | \
+      grep -oE '^[0-9]{4}' | sort -n | tail -1 | awk '{printf "%04d\n", $1+1}'

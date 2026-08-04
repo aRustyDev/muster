@@ -15,6 +15,14 @@ which describes *what the codebase is*. See Rule 07 for the split.
 | 07 | Context files (CLAUDE.md vs AGENTS.md) | yes |
 | 08 | Git and commits | yes *(written Phase 2)* |
 | 09 | Security and secrets | yes *(written Phase 2)* |
+| 10 | Documentation structure | yes *(written by ADR-0027, 2026-08-03)* |
+
+## Path-scoped rules (ADR-0027)
+
+These load only when a matching file is read — the constraint exists
+even when its text is not in context: **Rule 04** (`crates/**`, `*.rs`,
+`Cargo.toml`) · **Rule 05** (`crates/**`) · **Rule 10** (`docs/**`,
+`.claude/**`, `*.md`).
 
 ## Keep rules short
 

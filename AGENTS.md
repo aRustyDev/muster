@@ -28,7 +28,8 @@ just orrery::check-seam         # no datastore type in orrery's public API
 
 *(Refreshed 2026-08-03, quality review F-13: nextest was described as
 "optional" while every test recipe requires it. Cross-crate testing
-policy: `.claude/plans/TESTING-STRATEGY.md`.)*
+strategy/policies: `docs/src/dev/{strategies,policies,patterns}/testing/`
+— decomposed 2026-08-03 from plans/TESTING-STRATEGY.md, ADR-0027.)*
 
 ## Invariants worth memorising
 
@@ -46,6 +47,6 @@ policy: `.claude/plans/TESTING-STRATEGY.md`.)*
 ## Where to look
 
 Plans and phase records: `.claude/plans/` (start at `PLAN.md`; per-product
-under `{orrery,muster-sdk,muster}/`). Decisions: `docs/src/adrs/` (MADR;
+under `{orrery,muster-sdk,muster}/`). Decisions: `docs/src/dev/adrs/` (MADR;
 ADR-0015 is the open one). Evidence: `evidence/` + RESEARCH docs under
 `.claude/plans/orrery/research/`.

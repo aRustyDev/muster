@@ -12,14 +12,21 @@
 
 ## Placement
 
-```
+```text
 /AGENTS.md              workspace orientation: build, test, lint, crate map
 /CLAUDE.md              thin: points at AGENTS.md + .claude/rules/**
+/CLAUDE.local.md        personal, gitignored, never committed
 /.claude/CLAUDE.md      the working agreement itself
+/.claude/rules/         binding constraints; paths:-scoped when file-type-specific (Rule 10)
+/.claude/skills|scripts/ evidence-graduated procedures + pre-authorized checks (ADR-0027)
+docs/src/dev/**         durable reference: adrs/strategies/policies/patterns/roadmaps (Rule 10)
 crates/orrery/AGENTS.md what this crate owns, must never contain, how to test
 crates/*/AGENTS.md      same, per crate
 docs/AGENTS.md          mdbook build, ADR conventions, numbering
 ```
+
+*(Placement amended 2026-08-03 by ADR-0027: added CLAUDE.local.md,
+rules scoping, skills/scripts, and the docs/src/dev split.)*
 
 **No per-crate `CLAUDE.md`.** Behavioural rules do not vary by directory; scope
 rules do, and those live in each crate's `AGENTS.md` and in Rule 03.

@@ -36,7 +36,7 @@ temptation).
 * Scope: `cargo tree -p muster` may gain UI deps at Prototype (per the
   QUESTION-0015 decision), never solver or datastore deps.
 
-## Quality-review additions (2026-08-03, QR-3 — items resolve in `plans/quality-review/02-additions-and-order.md`; cross-crate policy in `plans/TESTING-STRATEGY.md`)
+## Quality-review additions (2026-08-03, QR-3 — items resolve in `plans/quality-review/02-additions-and-order.md`; cross-crate policy in `docs/src/dev/policies/testing/`)
 
 All Alpha-entry items below are pre-commitment content for the Muster
 Alpha slice (M-6): the pre-commitment carries the six F-4 privacy
@@ -65,7 +65,7 @@ deferred with a dated owner (Rule 01.2).
 * **Egress gate (M-8, F-4 b — owner: RC pre-commitment).** The
   Parquet/CSV "anchors excluded by default" posture gets its executable
   test statement at the Beta/RC pre-commitment; posture restated in
-  TESTING-STRATEGY.
+  `docs/src/dev/policies/testing/standing-policies.md`.
 
 ### muster-types (inherits this spec — per-crate sections, not separate files)
 
@@ -73,8 +73,8 @@ deferred with a dated owner (Rule 01.2).
   gets a proptest roundtrip (serialize → deserialize → equality); the
   unknown-field posture is decided alongside the coordinator DTOs. These
   are the crate's first own tests, arriving with its first input
-  surface; until then its test absence is by design (TESTING-STRATEGY,
-  test-double placement).
+  surface; until then its test absence is by design
+  (`docs/src/dev/patterns/testing/test-doubles.md`).
 * **Cross-member privacy (T-2, F-4 c — Alpha entry).** Member A's wire
   payload contains no identifier of member B — the contract the
   privacy_wire key allowlist cannot see (person-shaped leaks inside

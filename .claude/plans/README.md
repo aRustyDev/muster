@@ -1,5 +1,27 @@
 # plans/ — layout and derivation
 
+## Moved to docs/src (2026-08-03, ADR-0027 — the old→new map)
+
+`docs/src/` is the durable reference home (decisions, strategies,
+policies, patterns, roadmaps, glossary); `plans/` holds the working
+corpus. Historical documents below this date reference the old paths —
+resolve them here:
+
+| Old path | New home |
+|---|---|
+| `docs/src/adrs/NNNN-*.md` (flat) | `docs/src/dev/adrs/<topic>/NNNN-*.md` (topic table: `dev/adrs/README.md`) |
+| `plans/GLOSSARY.md` | `docs/src/dev/glossary.md` |
+| `plans/TESTING-STRATEGY.md` §Taxonomy | `docs/src/dev/strategies/testing/coverage-taxonomy.md` |
+| §Tool roster + RR&P + reading list | `docs/src/dev/strategies/testing/tool-roster.md` |
+| §Measurement-variance (W-2) | `docs/src/dev/policies/benchmarking/measurement-variance.md` |
+| §Property naming/budgets + §Regression | `docs/src/dev/policies/testing/property-and-regression.md` |
+| §Standing policies | `docs/src/dev/policies/testing/standing-policies.md` |
+| §Test doubles | `docs/src/dev/patterns/testing/test-doubles.md` |
+
+`docs/src/dev/roadmaps/` is reserved for cross-plan summarizing
+roadmaps (owner ruling 2026-08-03): PLAN.md and ROADMAP.md are
+plan-specific and **stay here**.
+
 ## Why the overall PLAN.md and ROADMAP.md live at the plans/ root
 
 **The roadmap's primary job is drawing boundaries *between* the three
@@ -27,10 +49,11 @@ cross-product quality-strategy review (testing / benchmarking / profiling /
 validation / telemetry coverage of every crate). Executed 2026-08-02/03:
 `01-gap-matrix.md` (Stage A+B evidence), `02-additions-and-order.md`
 (Stage C+D synthesis — RR&P stages, ordering, semver), `03-qf-slice.md`
-(the QF implementation slice). The durable cross-crate strategy lives at
-`plans/TESTING-STRATEGY.md` (single home, Rule 07); per-crate criteria in
-each product's testing spec; the accepted-items ledger in
-`CARRY-FORWARD.md`; tool adoptions in ADR-0026.
+(the QF implementation slice). The durable cross-crate strategy lived at
+`plans/TESTING-STRATEGY.md` until 2026-08-03, when ADR-0027 decomposed it
+into `docs/src/dev/` (map below); per-crate criteria in each product's
+testing spec; the accepted-items ledger in `CARRY-FORWARD.md`; tool
+adoptions in ADR-0026.
 
 ## Numbering
 

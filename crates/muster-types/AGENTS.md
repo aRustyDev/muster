@@ -17,8 +17,9 @@ serde + uuid.
 
 By design, this crate's contract tests live in **muster-server** — the
 privacy boundary's single enforcement point (`privacy_wire` key
-allowlist, `wire_names` pinning; see TESTING-STRATEGY's test-double
-placement section). The crate gains its first own tests at Muster Alpha:
+allowlist, `wire_names` pinning; see
+`docs/src/dev/patterns/testing/test-doubles.md`). The crate gains its
+first own tests at Muster Alpha:
 serde roundtrip properties for every DTO plus the cross-member privacy
 test (muster/SPEC-03, T-1/T-2) — a justfile arrives with them.
 
