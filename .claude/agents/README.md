@@ -64,6 +64,19 @@ criteria, and refuses to backfill a hypothesis after results are known.
 
 Output: `phases/NN-*.md`.
 
+## User-level retro agents (outside this roster, still reviewed)
+
+`retro-debrief` · `retro-lessons` · `retro-knowledge` live at user
+level (`~/.claude/agents/`, not committed here) — created 2026-08-03 by
+owner direction, ahead of rule-of-three (ADR-0027 §7 allows the owner
+to override the evidence path). The compact self-review hook
+(`.claude/scripts/compact-self-review.sh`) delegates the W6 harvest to
+them; their named output artefact is rows appended to
+`.claude/observations.md` through
+`~/.claude/scripts/append-observation.sh` — the single write door.
+The CR-slice roster review covers them despite their living outside
+the repo.
+
 ## Not worth creating
 
 * A general "coder" agent — that is the main session.

@@ -14,6 +14,14 @@ convention stated, not recorded → rule/docs · "whenever X" by memory →
 hook · permission friction → hook/allowlist/script · re-composed
 pipeline → script · blocked-on-owner → policy/ADR gap.
 
+*Amended 2026-08-03 (owner-directed): rows may also be appended by the
+user-level retro agents (`retro-debrief` · `retro-lessons` ·
+`retro-knowledge`) through `~/.claude/scripts/append-observation.sh` —
+the single write door, kept so the storage backend can change in one
+place without touching callers. Retro rows may use the extended
+classes: problem→solution · lesson · advice to self · entity ·
+relation · effort sink.*
+
 | Date | Session | Class | Observation | Candidate |
 |---|---|---|---|---|
 | 2026-08-03 | QR-3 | repeated procedure | slice close-out protocol (commit → memory update → rewrite/retire kickoff) executed manually in every QR/phase session; steps re-read from the plan doc each time | skill: `slice-close` |
@@ -27,3 +35,4 @@ pipeline → script · blocked-on-owner → policy/ADR gap.
 | 2026-08-03 | CR-1 | "whenever X" by memory | `just docs::check-links` had been red since the 2026-08-01 ADR import (6 untagged fences compiled as Rust doctests) — the gate existed but no session ran it; found only because CR-1 pre-committed it as a criterion (F-2's class: a gate conditioned on nobody) | close-out protocol names the full gate set; RR&P-1 CI runs `docs::check-links` |
 | 2026-08-03 | CR-2 | correction pattern | the `git add -A` reflex reappeared (blocked this time by the QR-3 gitignore fix; explicit-path staging used after) — 2nd row for this candidate | hook: pre-commit check for untracked generated dirs |
 | 2026-08-03 | CR-2 | re-composed pipeline | `just audit && just docs::build && just docs::check-links` hand-composed ~6× as the per-commit gate loop | `just gates` (or equivalent) recipe naming the full docs gate set |
+| 2026-08-03 | CR-2+ | owner directive | owner directed creation of the global retro agents (debrief/lessons/knowledge) and the append-observation.sh single write door, ahead of rule-of-three; gitkraken-hooks plugin disabled at the same time | CR-3 roster review covers the retro-* agents and the append script |
