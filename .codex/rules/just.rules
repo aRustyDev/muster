@@ -1,0 +1,9 @@
+# Codex permission rules. Tracked deliberately: an untracked allow-list is per-machine, so
+# two operators get different agent behaviour from the same task.
+# Read-only and hermetic only. Mutating and irreversible commands are deliberately absent --
+# they fall through to a prompt, which is the decision point.
+# Added 2026-08-31.
+# Verified 2026-08-31: no recipe in this repo's justfile mutates a cluster, applies
+# Terraform, pushes, or opens a PR. Blanket allow is therefore safe, and stays correct as
+# recipes are added rather than going stale. RE-CHECK if a mutating recipe is ever added.
+prefix_rule(pattern=["just"], decision="allow")
