@@ -1,9 +1,13 @@
-# Codex permission rules. Tracked deliberately: an untracked allow-list is per-machine, so
-# two operators get different agent behaviour from the same task.
-# Read-only and hermetic only. Mutating and irreversible commands are deliberately absent --
-# they fall through to a prompt, which is the decision point.
-# Added 2026-08-31.
-# Verified 2026-08-31: no recipe in this repo's justfile mutates a cluster, applies
-# Terraform, pushes, or opens a PR. Blanket allow is therefore safe, and stays correct as
-# recipes are added rather than going stale. RE-CHECK if a mutating recipe is ever added.
-prefix_rule(pattern=["just"], decision="allow")
+# Codex permission rules. Tracked deliberately: an untracked allow-list is per-machine.
+# Read-only and hermetic only. Mutating commands are absent and fall through to a prompt.
+#
+# CORRECTED 2026-08-31 after review. Every defect below was the same mistake: a comment
+# asserting an invariant that POSITIONAL PREFIX MATCHING CANNOT ENFORCE. A rule can only
+# constrain a command's PREFIX -- never a flag or refspec that appears later in argv.
+# If you cannot express the safe subset as a prefix, do not write the allow.
+#
+# NOT a blanket allow. A blanket `just` auto-approves every recipe the justfile gains later,
+# and an agent that can edit the justfile can run anything through it. The earlier claim that
+# a blanket 'stays correct as recipes are added rather than going stale' was exactly backwards.
+# Enumerated hermetic recipes only. RE-CHECK this list when a recipe is added.
+prefix_rule(pattern=["just", ["audit", "docs-build", "fmt", "fmt-check", "lint", "test", "test-doc", "test-prop"]], decision="allow")
